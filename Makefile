@@ -1,7 +1,7 @@
-SOURCE=ascii_console
+SOURCE=cp437_console
 SOURCE_PATH=app/
 BINDER=../dragonruby-bind
-BINDER_FFI_MODULE=ASCIIConsole
+BINDER_FFI_MODULE=CP437Console
 BINDER_CFLAGS='-I /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include -I../include -I.'
 BINDER_OUTPUT_EXTENSION=-bindings.c
 CC=clang

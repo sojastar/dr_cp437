@@ -28,7 +28,7 @@ typedef unsigned int  Uint32;
 
 /* ---=== FOR THE PIXEL ARRAY : ===--- */
 extern void *(*drb_symbol_lookup)(const char *sym);
-typedef void (*drb_upload_pixel_array_fn)(const char *name, const int w, const int h, const Uint32 *pixels);
+typedef void (*drb_upload_pixel_array_fn)(const char *name,const int w,const int h,const Uint32 *pixels);
 
 /* ---=== CONSOLE RELATED : ===--- */
 typedef struct Glyph {
@@ -56,7 +56,7 @@ typedef struct Console {
 /* FUNCTION PROTOTYPES :                                                      */
 /******************************************************************************/
 void print_console_pixels(void);
-void blit_glyph_at(Glyph glyph,Uint32 x,Uint32 y);
+void draw_glyph_at(Glyph glyph,Uint32 x,Uint32 y);
 
 
 
@@ -102,10 +102,9 @@ void init_console(Uint32 width,Uint32 height,Glyph init_glyph) {
 
   for(size_t i = 0; i < height; i+=1) {
     for(size_t j = 0; j < width; j+=1) {
-      blit_glyph_at(console->glyphs[i * width + j], j, i);
+      draw_glyph_at(console->glyphs[i * width + j], j, i);
     }
   }
-  //print_console_pixels();
   console->drb_upload_pixel_array = drb_symbol_lookup("drb_upload_pixel_array");
 }
 
@@ -155,7 +154,7 @@ int get_console_pixel_height(void) {
 
 /* ---=== DRAWING : ===--- */
 DRB_FFI
-void blit_glyph_at(Glyph glyph,Uint32 x,Uint32 y) {
+void draw_glyph_at(Glyph glyph,Uint32 x,Uint32 y) {
   Uint32 x_offset = x * GLYPH_PIXEL_WIDTH;
   Uint32 y_offset = y * GLYPH_PIXEL_HEIGHT;
 
@@ -167,6 +166,7 @@ void blit_glyph_at(Glyph glyph,Uint32 x,Uint32 y) {
     }
   }
 }
+
 
 DRB_FFI
 void update_console(void) {
