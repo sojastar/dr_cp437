@@ -4,7 +4,7 @@
 #include <mruby/string.h>
 #include <mruby/data.h>
 #include <dragonruby.h>
-#include "mygame/app/ascii_console.c"
+#include "app/ascii_console.c"
 
 // MRuby `typedef`s mrb_int in the mruby/value.h
 // Then `#define`s mrb_int in mruby.h
@@ -144,6 +144,14 @@ static mrb_value drb_ffi_get_glyph_at_Binding(mrb_state *state, mrb_value value)
     Glyph ret_val = get_glyph_at(x_0, y_1);
     return drb_ffi__ZTS5Glyph_ToRuby(state, ret_val);
 }
+static mrb_value drb_ffi_get_console_pixel_width_Binding(mrb_state *state, mrb_value value) {
+    int ret_val = get_console_pixel_width();
+    return drb_ffi__ZTSi_ToRuby(state, ret_val);
+}
+static mrb_value drb_ffi_get_console_pixel_height_Binding(mrb_state *state, mrb_value value) {
+    int ret_val = get_console_pixel_height();
+    return drb_ffi__ZTSi_ToRuby(state, ret_val);
+}
 static mrb_value drb_ffi_blit_glyph_at_Binding(mrb_state *state, mrb_value value) {
     mrb_value *args = 0;
     mrb_int argc = 0;
@@ -170,6 +178,8 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_module_function_f(state, module, "get_console_width", drb_ffi_get_console_width_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_console_height", drb_ffi_get_console_height_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_glyph_at", drb_ffi_get_glyph_at_Binding, MRB_ARGS_REQ(2));
+    mrb_define_module_function_f(state, module, "get_console_pixel_width", drb_ffi_get_console_pixel_width_Binding, MRB_ARGS_REQ(0));
+    mrb_define_module_function_f(state, module, "get_console_pixel_height", drb_ffi_get_console_pixel_height_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "blit_glyph_at", drb_ffi_blit_glyph_at_Binding, MRB_ARGS_REQ(3));
     mrb_define_module_function_f(state, module, "update_console", drb_ffi_update_console_Binding, MRB_ARGS_REQ(0));
     struct RClass *GlyphClass = mrb_define_class_under_f(state, module, "Glyph", object_class);

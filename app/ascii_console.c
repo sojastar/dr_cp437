@@ -142,6 +142,16 @@ Glyph get_glyph_at(Uint32 x,Uint32 y) {
   return console->glyphs[index];
 }
 
+DRB_FFI
+int get_console_pixel_width(void) {
+  return GLYPH_PIXEL_WIDTH * console->width;
+}
+
+DRB_FFI
+int get_console_pixel_height(void) {
+  return GLYPH_PIXEL_HEIGHT * console->height;
+}
+
 
 /* ---=== DRAWING : ===--- */
 DRB_FFI
