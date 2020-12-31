@@ -1,4 +1,4 @@
-#include "font.h"
+#include "cp437_8x8.h"
 #include <dragonruby.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -159,7 +159,7 @@ void draw_glyph_at(Glyph glyph,Uint32 x,Uint32 y) {
   Uint32 y_offset = y * GLYPH_PIXEL_HEIGHT;
 
   for(size_t i = 0; i < GLYPH_PIXEL_HEIGHT; i+=1 ) {
-    char line = font8x8_basic[glyph.index][i];
+    char line = cp437_8x8[glyph.index][i];
     for(size_t j = 0; j < GLYPH_PIXEL_WIDTH; j+=1) {
       Uint32 pixel_index            = ( y_offset + i ) * console->pixel_width + x_offset + j;
       console->pixels[pixel_index]  = ((line >> j) & 1 ) == true ? glyph.foreground : glyph.background;

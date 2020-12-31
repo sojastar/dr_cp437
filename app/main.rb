@@ -10,7 +10,7 @@ CONSOLE_HEIGHT  = 90
 def setup(args)
   args.state.console    = CP437::Console.new  CONSOLE_WIDTH,
                                               CONSOLE_HEIGHT,
-                                              33,
+                                              1,  # nice smile
                                               [0, 0, 255, 255],
                                               [255, 0, 0, 255]
 
@@ -20,13 +20,7 @@ end
 def tick(args)
   setup(args) unless args.state.setup_done
 
-  #new_x     = rand CONSOLE_WIDTH
-  #new_y     = rand CONSOLE_HEIGHT
-  #new_glyph = CP437::Glyph::create  35,
-  #                                  [randv, randv, randv, 255],
-  #                                  [randv, randv, randv, 255]
-  #args.state.console.draw_glyph_at new_glyph, new_x, new_y
-  args.state.console.set_current_glyph_index  [ 34, 35, 36 ].sample
+  args.state.console.set_current_glyph_index  [ 3, 4, 5, 6 ].sample
   args.state.console.set_current_background   [ randv, randv, randv, 255 ]
   args.state.console.set_current_foreground   [ randv, randv, randv, 255 ]
   new_x     = rand CONSOLE_WIDTH
