@@ -12,6 +12,8 @@ module CP437
 
       @pixel_width  = FFI::CP437Console.get_console_pixel_width
       @pixel_height = FFI::CP437Console.get_console_pixel_height
+
+      @glyph_buffer = FFI::CP437Console::Glyph.new
     end
 
     def width()           FFI::CP437Console.get_console_width   end
@@ -22,8 +24,22 @@ module CP437
       FFI::CP437Console::update_console
     end
 
-    def draw_glyph_at(glyph,x,y)
-      FFI::CP437Console.draw_glyph_at glyph, x, y
+    def set_current_background(color)
+      @glyph_buffer.background  = CP437::Color::pack_color *color
+    end
+
+    def set_current_foreground(color)
+      @glyph_buffer.foreground  = CP437::Color::pack_color *color
+    end
+
+    def set_current_glyph_index(index)
+      @glyph_buffer.index       = index
+    end
+
+    #def draw_glyph_at(glyph,x,y)
+    def draw_glyph_at(x,y)
+      #FFI::CP437Console.draw_glyph_at glyph, x, y
+      FFI::CP437Console.draw_glyph_at @glyph_buffer, x, y
     end
 
     def render(args,x,y,scale)
