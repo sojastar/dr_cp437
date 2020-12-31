@@ -152,14 +152,45 @@ static mrb_value drb_ffi_get_console_pixel_height_Binding(mrb_state *state, mrb_
     int ret_val = get_console_pixel_height();
     return drb_ffi__ZTSi_ToRuby(state, ret_val);
 }
+static mrb_value drb_ffi_set_gc_index_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint8 index_0 = drb_ffi__ZTSh_FromRuby(state, args[0]);
+    set_gc_index(index_0);
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi_set_gc_background_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 background_0 = drb_ffi__ZTSj_FromRuby(state, args[0]);
+    set_gc_background(background_0);
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi_set_gc_foreground_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 foreground_0 = drb_ffi__ZTSj_FromRuby(state, args[0]);
+    set_gc_foreground(foreground_0);
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi_set_gc_antialiased_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    int antialiased_0 = drb_ffi__ZTSi_FromRuby(state, args[0]);
+    set_gc_antialiased(antialiased_0);
+    return mrb_nil_value();
+}
 static mrb_value drb_ffi_draw_glyph_at_Binding(mrb_state *state, mrb_value value) {
     mrb_value *args = 0;
     mrb_int argc = 0;
     mrb_get_args_f(state, "*", &args, &argc);
-    Glyph glyph_0 = drb_ffi__ZTS5Glyph_FromRuby(state, args[0]);
-    Uint32 x_1 = drb_ffi__ZTSj_FromRuby(state, args[1]);
-    Uint32 y_2 = drb_ffi__ZTSj_FromRuby(state, args[2]);
-    draw_glyph_at(glyph_0, x_1, y_2);
+    Uint32 x_0 = drb_ffi__ZTSj_FromRuby(state, args[0]);
+    Uint32 y_1 = drb_ffi__ZTSj_FromRuby(state, args[1]);
+    draw_glyph_at(x_0, y_1);
     return mrb_nil_value();
 }
 static mrb_value drb_ffi_update_console_Binding(mrb_state *state, mrb_value value) {
@@ -180,7 +211,11 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_module_function_f(state, module, "get_glyph_at", drb_ffi_get_glyph_at_Binding, MRB_ARGS_REQ(2));
     mrb_define_module_function_f(state, module, "get_console_pixel_width", drb_ffi_get_console_pixel_width_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_console_pixel_height", drb_ffi_get_console_pixel_height_Binding, MRB_ARGS_REQ(0));
-    mrb_define_module_function_f(state, module, "draw_glyph_at", drb_ffi_draw_glyph_at_Binding, MRB_ARGS_REQ(3));
+    mrb_define_module_function_f(state, module, "set_gc_index", drb_ffi_set_gc_index_Binding, MRB_ARGS_REQ(1));
+    mrb_define_module_function_f(state, module, "set_gc_background", drb_ffi_set_gc_background_Binding, MRB_ARGS_REQ(1));
+    mrb_define_module_function_f(state, module, "set_gc_foreground", drb_ffi_set_gc_foreground_Binding, MRB_ARGS_REQ(1));
+    mrb_define_module_function_f(state, module, "set_gc_antialiased", drb_ffi_set_gc_antialiased_Binding, MRB_ARGS_REQ(1));
+    mrb_define_module_function_f(state, module, "draw_glyph_at", drb_ffi_draw_glyph_at_Binding, MRB_ARGS_REQ(2));
     mrb_define_module_function_f(state, module, "update_console", drb_ffi_update_console_Binding, MRB_ARGS_REQ(0));
     struct RClass *GlyphClass = mrb_define_class_under_f(state, module, "Glyph", object_class);
     mrb_define_class_method_f(state, GlyphClass, "new", drb_ffi__ZTS5Glyph_New, MRB_ARGS_REQ(0));

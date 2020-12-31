@@ -9,7 +9,7 @@ CFLAGS=-shared -isystem include -I../include -I. -fPIC
 DYLIB_PATH=native/macos/
 DYLIB_EXTENSION=.dylib
 
-ascii_console:
+cp437_console:
 	$(BINDER) --ffi-module=$(BINDER_FFI_MODULE) --compiler-flags=$(BINDER_CFLAGS) --output=$(SOURCE_PATH)$(SOURCE)$(BINDER_OUTPUT_EXTENSION) $(SOURCE_PATH)$(SOURCE).c
 	$(CC) $(CFLAGS) -o $(DYLIB_PATH)$(SOURCE)$(DYLIB_EXTENSION) $(SOURCE_PATH)$(SOURCE)$(BINDER_OUTPUT_EXTENSION)
 
