@@ -38,9 +38,14 @@ typedef struct Glyph {
 } Glyph;
 
 typedef struct GraphicContext {
-  Uint32  foreground;
   Uint32  background;
+  Uint32  foreground;
   Uint8   index;
+
+  bool    should_draw_background;
+  bool    should_draw_foreground;
+  bool    should_draw_index;
+
   bool    antialiased;
 } GraphicContext;
 
@@ -107,9 +112,12 @@ void init_console(Uint32 width,Uint32 height,Glyph init_glyph) {
   console->glyphs = (Glyph*)calloc(console->size, sizeof(Glyph));
 
   // --- Setting the graphic context :
-  console->graphic_context.index      = init_glyph.index;
-  console->graphic_context.background = init_glyph.background;
-  console->graphic_context.foreground = init_glyph.foreground;
+  console->graphic_context.background             = init_glyph.background;
+  console->graphic_context.foreground             = init_glyph.foreground;
+  console->graphic_context.index                  = init_glyph.index;
+  console->graphic_context.should_draw_background = true;
+  console->graphic_context.should_draw_foreground = true;
+  console->graphic_context.should_draw_index      = true;
 
   // --- Setting the console's pixel array :
   console->pixel_width  = width  * GLYPH_PIXEL_WIDTH;
@@ -139,6 +147,13 @@ void delete_console(void) {
   free(console->glyphs);
   free(console->pixels);
   free(console);
+}
+
+
+/* ---=== UPDATE : ===--- */
+DRB_FFI
+void update_console(void) {
+  console->drb_upload_pixel_array("console", console->pixel_width, console->pixel_height, console->pixels);
 }
 
 
@@ -195,28 +210,26 @@ void set_gc_antialiased(bool antialiased) {
 /* ---=== DRAWING : ===--- */
 DRB_FFI
 void draw_glyph_at(Uint32 x,Uint32 y) {
-  // --- Updating the glyphs :
+  // --- What glyph are we talking about ?
   Uint32 glyph_offset = y * console->width + x;
-  console->glyphs[glyph_offset].index       = console->graphic_context.index;
-  console->glyphs[glyph_offset].background  = console->graphic_context.background;
-  console->glyphs[glyph_offset].foreground  = console->graphic_context.foreground;
+
+  // --- Updating the glyphs :
+  if (console->graphic_context.should_draw_index)
+    console->glyphs[glyph_offset].index       = console->graphic_context.index;
+  if (console->graphic_context.should_draw_background)
+    console->glyphs[glyph_offset].background  = console->graphic_context.background;
+  if (console->graphic_context.should_draw_foreground)
+    console->glyphs[glyph_offset].foreground  = console->graphic_context.foreground;
 
   // --- Drawing the pixels :
   Uint32 x_offset = x * GLYPH_PIXEL_WIDTH;
   Uint32 y_offset = y * GLYPH_PIXEL_HEIGHT;
 
   for(size_t i = 0; i < GLYPH_PIXEL_HEIGHT; i+=1 ) {
-    char line = cp437_8x8[console->graphic_context.index][i];
+    char line = cp437_8x8[console->glyphs[glyph_offset].index][i];
     for(size_t j = 0; j < GLYPH_PIXEL_WIDTH; j+=1) {
       Uint32 pixel_index            = ( y_offset + i ) * console->pixel_width + x_offset + j;
-      console->pixels[pixel_index]  = ((line >> j) & 1 ) == true ? console->graphic_context.foreground : console->graphic_context.background;
+      console->pixels[pixel_index]  = ((line >> j) & 1 ) == true ? console->glyphs[glyph_offset].foreground : console->glyphs[glyph_offset].background;
     }
   }
-}
-
-
-/* ---=== UPDATE : ===--- */
-DRB_FFI
-void update_console(void) {
-  console->drb_upload_pixel_array("console", console->pixel_width, console->pixel_height, console->pixels);
 }

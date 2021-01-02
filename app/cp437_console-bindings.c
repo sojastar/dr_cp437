@@ -127,6 +127,10 @@ static mrb_value drb_ffi_delete_console_Binding(mrb_state *state, mrb_value valu
     delete_console();
     return mrb_nil_value();
 }
+static mrb_value drb_ffi_update_console_Binding(mrb_state *state, mrb_value value) {
+    update_console();
+    return mrb_nil_value();
+}
 static mrb_value drb_ffi_get_console_width_Binding(mrb_state *state, mrb_value value) {
     int ret_val = get_console_width();
     return drb_ffi__ZTSi_ToRuby(state, ret_val);
@@ -193,10 +197,6 @@ static mrb_value drb_ffi_draw_glyph_at_Binding(mrb_state *state, mrb_value value
     draw_glyph_at(x_0, y_1);
     return mrb_nil_value();
 }
-static mrb_value drb_ffi_update_console_Binding(mrb_state *state, mrb_value value) {
-    update_console();
-    return mrb_nil_value();
-}
 static int drb_ffi_init_indirect_functions(void *(*lookup)(const char *));
 DRB_FFI_EXPORT
 void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, struct RClass *FFI) {
@@ -206,6 +206,7 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     struct RClass *object_class = state->object_class;
     mrb_define_module_function_f(state, module, "init_console", drb_ffi_init_console_Binding, MRB_ARGS_REQ(3));
     mrb_define_module_function_f(state, module, "delete_console", drb_ffi_delete_console_Binding, MRB_ARGS_REQ(0));
+    mrb_define_module_function_f(state, module, "update_console", drb_ffi_update_console_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_console_width", drb_ffi_get_console_width_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_console_height", drb_ffi_get_console_height_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_glyph_at", drb_ffi_get_glyph_at_Binding, MRB_ARGS_REQ(2));
@@ -216,7 +217,6 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_module_function_f(state, module, "set_gc_foreground", drb_ffi_set_gc_foreground_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_antialiased", drb_ffi_set_gc_antialiased_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "draw_glyph_at", drb_ffi_draw_glyph_at_Binding, MRB_ARGS_REQ(2));
-    mrb_define_module_function_f(state, module, "update_console", drb_ffi_update_console_Binding, MRB_ARGS_REQ(0));
     struct RClass *GlyphClass = mrb_define_class_under_f(state, module, "Glyph", object_class);
     mrb_define_class_method_f(state, GlyphClass, "new", drb_ffi__ZTS5Glyph_New, MRB_ARGS_REQ(0));
     mrb_define_method_f(state, GlyphClass, "foreground", drb_ffi__ZTS5Glyph_foreground_Get, MRB_ARGS_REQ(0));
