@@ -23,6 +23,7 @@ module CP437
     end
 
     def set_current_background(color)
+      puts CP437::Color::pack_color(*color)
       FFI::CP437Console.set_gc_background CP437::Color::pack_color(*color)
     end
 
@@ -36,6 +37,30 @@ module CP437
 
     def draw_glyph_at(x,y)
       FFI::CP437Console.draw_glyph_at x, y
+    end
+
+    def draw_horizontal_line(x1,x2,y)
+      FFI::CP437Console.draw_horizontal_line x1, x2, y
+    end
+
+    def draw_vertical_line(x,y1,y2)
+      FFI::CP437Console.draw_vertical_line x, y1, y2
+    end
+
+    def draw_line(x1,y1,x2,y2)
+      FFI::CP437Console.draw_line x1, y1, x2, y2
+    end
+
+    def stroke_rectanlge(x,y,width,height)
+      FFI::CP437Console.stroke_rectangle x, y, width, height
+    end
+
+    def fill_rectangle(x,y,width,height)
+      FFI::CP437Console.fill_rectangle x, y, width, height
+    end
+
+    def draw_window(x,y,width,height)
+      FFI::CP437Console.draw_window x, y, width, height
     end
 
     def render(args,x,y,scale)

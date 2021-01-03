@@ -14,6 +14,20 @@ def setup(args)
                                               [0, 0, 255, 255],
                                               [255, 0, 0, 255]
 
+  # Test lines :
+  args.state.console.set_current_glyph_index  176
+  args.state.console.set_current_background   [ 255, 255, 0, 255 ]
+  args.state.console.set_current_foreground   [   0, 255, 0, 255 ]
+  args.state.console.draw_horizontal_line     10, 150, 45
+  args.state.console.draw_vertical_line       80, 10, 80
+  args.state.console.draw_line                10, 10, 150, 80
+
+  # Test rectangles :
+  args.state.console.set_current_glyph_index  15
+  args.state.console.set_current_background   [ 0, 127, 255, 255 ]
+  args.state.console.set_current_foreground   [ 0, 255, 0, 255 ]
+  args.state.console.draw_window              1, 1, 12, 8
+
   args.state.setup_done = true
 end
 
@@ -31,7 +45,7 @@ def tick(args)
 
   args.state.console.render(args, 0, 0, 1)
 
-  args.outputs.primitives << args.gtk.current_framerate_primitives
+  #args.outputs.primitives << args.gtk.current_framerate_primitives
 end
 
 def randv

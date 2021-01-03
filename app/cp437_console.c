@@ -47,6 +47,13 @@ typedef struct GraphicContext {
   bool    should_draw_index;
 
   bool    antialiased;
+
+  Uint8   window_top_left_index;
+  Uint8   window_top_right_index;
+  Uint8   window_bottom_left_index;
+  Uint8   window_bottom_right_index;
+  Uint8   window_top_bottom_index;
+  Uint8   window_left_right_index;
 } GraphicContext;
 
 typedef struct Console {
@@ -79,6 +86,8 @@ typedef struct Console {
 /******************************************************************************/
 void print_console_pixels(void);
 void draw_glyph_at(Uint32 x,Uint32 y);
+void draw_horizontal_line(Uint32 x1,Uint32 x2,Uint32 y);
+void draw_vertical_line(Uint32 x,Uint32 y1,Uint32 y2);
 
 
 
@@ -112,12 +121,22 @@ void init_console(Uint32 width,Uint32 height,Glyph init_glyph) {
   console->glyphs = (Glyph*)calloc(console->size, sizeof(Glyph));
 
   // --- Setting the graphic context :
-  console->graphic_context.background             = init_glyph.background;
-  console->graphic_context.foreground             = init_glyph.foreground;
-  console->graphic_context.index                  = init_glyph.index;
-  console->graphic_context.should_draw_background = true;
-  console->graphic_context.should_draw_foreground = true;
-  console->graphic_context.should_draw_index      = true;
+  console->graphic_context.background                 = init_glyph.background;
+  console->graphic_context.foreground                 = init_glyph.foreground;
+  console->graphic_context.index                      = init_glyph.index;
+
+  console->graphic_context.should_draw_background     = true;
+  console->graphic_context.should_draw_foreground     = true;
+  console->graphic_context.should_draw_index          = true;
+
+  console->graphic_context.antialiased                = false;
+
+  console->graphic_context.window_top_left_index      = 201;
+  console->graphic_context.window_top_right_index     = 187;
+  console->graphic_context.window_bottom_left_index   = 200;
+  console->graphic_context.window_bottom_right_index  = 188;
+  console->graphic_context.window_top_bottom_index    = 205;
+  console->graphic_context.window_left_right_index    = 186;
 
   // --- Setting the console's pixel array :
   console->pixel_width  = width  * GLYPH_PIXEL_WIDTH;
@@ -208,6 +227,8 @@ void set_gc_antialiased(bool antialiased) {
 
 
 /* ---=== DRAWING : ===--- */
+
+// --- Single Glyph :
 DRB_FFI
 void draw_glyph_at(Uint32 x,Uint32 y) {
   // --- What glyph are we talking about ?
@@ -232,4 +253,161 @@ void draw_glyph_at(Uint32 x,Uint32 y) {
       console->pixels[pixel_index]  = ((line >> j) & 1 ) == true ? console->glyphs[glyph_offset].foreground : console->glyphs[glyph_offset].background;
     }
   }
+}
+
+// --- Lines :
+DRB_FFI
+void draw_horizontal_line(Uint32 x1,Uint32 x2,Uint32 y) {
+  Uint32 start, end;
+
+  if (x1 <= x2) {
+    start = x1;
+    end   = x2;
+  }
+  else {
+    start = x2;
+    end   = x1;
+  }
+
+  for(size_t x = start; x <= end; x++)
+    draw_glyph_at(x, y);
+}
+
+DRB_FFI
+void draw_vertical_line(Uint32 x,Uint32 y1,Uint32 y2) {
+  Uint32 start, end;
+
+  if (y1 <= y2) {
+    start = y1;
+    end   = y2;
+  }
+  else {
+    start = y2;
+    end   = y1;
+  }
+
+  for(size_t y = start; y <= end; y++)
+    draw_glyph_at(x, y);
+}
+
+DRB_FFI
+void draw_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
+  int x, y, dx, dy, x_increment, y_increment, d;
+
+  // Set-up of the bresenham algorythm :
+  x = x1;
+  y = y1;
+
+  dx = x2 - x1;
+  dy = y2 - y1;
+
+  x_increment = ( dx > 0 ) ? 1 : -1 ;
+  y_increment = ( dy > 0 ) ? 1 : -1 ;
+
+
+  // Edge cases :
+  if (dx == 0)  // vertical line
+    draw_vertical_line(x1, y1, y2);
+
+  if (dy == 0)  // horizontal line
+    draw_horizontal_line(x1, y1, y2);
+
+  dx = abs(dx);
+  dy = abs(dy);
+
+
+  // Drawing the line :
+
+  // First Point :
+  draw_glyph_at(x1, y1);
+
+  // Rest of the Line :
+  if (dx > dy) {
+
+    d = dx / 2;
+
+    for(size_t i = 1; i <= dx; i += 1) {
+      x += x_increment;
+      d += dy;
+
+      if (d >= dx) {
+        d -= dx;
+        y += y_increment;
+        draw_glyph_at(x, y);
+      }
+      else {
+        if (y_increment < 0)
+          draw_glyph_at(x, y);
+        else
+          draw_glyph_at(x, y + 1);
+      }
+    }
+  }
+  else {
+    d = dy / 2;
+
+    for(size_t i = 1; i <= dy; i += 1) {
+      y += y_increment;
+      d += dx;
+
+      if (d >= dy) {
+        d -= dy;
+        x += x_increment;
+      }
+
+      draw_glyph_at(x, y);
+    }
+  }
+}
+
+// --- Rectangles :
+DRB_FFI
+void stroke_rectangle(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
+  for(size_t i = x; i < x + width; i += 1) {
+    draw_glyph_at(i, y);
+    draw_glyph_at(i, y + height - 1);
+  }
+  for(size_t i = y + 1; i < y + height - 1; i += 1) {
+    draw_glyph_at(x, i);
+    draw_glyph_at(x + width - 1, i);
+  }
+}
+
+DRB_FFI
+void fill_rectangle(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
+  for(size_t i = y; i < y + height - 1; i += 1)
+    for(size_t j = x; j < x + width - 1; j += 1)
+      draw_glyph_at(j, i);
+}
+
+// --- Windows :
+DRB_FFI
+void draw_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
+  Uint8 previous_index  = console->graphic_context.index;
+
+  console->graphic_context.index = console->graphic_context.window_top_left_index;
+  draw_glyph_at(x, y);
+
+  console->graphic_context.index = console->graphic_context.window_top_right_index;
+  draw_glyph_at(x + width - 1, y);
+
+  console->graphic_context.index = console->graphic_context.window_bottom_left_index;
+  draw_glyph_at(x, y + height - 1);
+
+  console->graphic_context.index = console->graphic_context.window_bottom_right_index;
+  draw_glyph_at(x + width - 1, y + height - 1);
+
+  console->graphic_context.index = console->graphic_context.window_top_bottom_index;
+  for(size_t i = x + 1; i < x + width - 1; i += 1) {
+    draw_glyph_at(i, y);
+    draw_glyph_at(i, y + height - 1);
+  }
+
+  console->graphic_context.index = console->graphic_context.window_left_right_index;
+  for(size_t i = y + 1; i < y + height - 1; i += 1) {
+    draw_glyph_at(x, i);
+    draw_glyph_at(x + width - 1, i);
+  }
+
+  console->graphic_context.index  = previous_index;
 }
