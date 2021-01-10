@@ -2,6 +2,9 @@ $gtk.ffi_misc.gtk_dlopen("cp437_console")
 
 module CP437
   class Console
+    attr_reader :width, :height,
+                :pixel_width, :pixel_height
+
     def initialize(width,height,index,background,foreground)
       init_glyph            = FFI::CP437Console::Glyph.new
       init_glyph.index      = index 
@@ -10,20 +13,27 @@ module CP437
 
       FFI::CP437Console::init_console width, height, init_glyph
 
+      @width        = width
+      @height       = height
+
       @pixel_width  = FFI::CP437Console.get_console_pixel_width
       @pixel_height = FFI::CP437Console.get_console_pixel_height
     end
 
-    def width()           FFI::CP437Console.get_console_width   end
-    def height()          FFI::CP437Console.get_console_height  end
+    #def width()           FFI::CP437Console.get_console_width   end
+    #def height()          FFI::CP437Console.get_console_height  end
     def get_glyph_at(x,y) FFI::CP437Console.get_glyph_at(x,y)   end
+
+    def get_mouse_coords(args)
+      [ ( args.inputs.mouse.point.x / 8 ).to_i, ( ( 720 - args.inputs.mouse.point.y ) / 8 ).to_i ]
+    end
+
 
     def update
       FFI::CP437Console::update_console
     end
 
     def set_current_background(color)
-      puts CP437::Color::pack_color(*color)
       FFI::CP437Console.set_gc_background CP437::Color::pack_color(*color)
     end
 
@@ -33,6 +43,10 @@ module CP437
 
     def set_current_glyph_index(index)
       FFI::CP437Console.set_gc_index index
+    end
+
+    def clear_console
+      FFI::CP437Console.clear_console()
     end
 
     def draw_glyph_at(x,y)
@@ -51,6 +65,10 @@ module CP437
       FFI::CP437Console.draw_line x1, y1, x2, y2
     end
 
+    def draw_antialiased_line(x1,y1,x2,y2)
+      FFI::CP437Console.draw_antialiased_line x1, y1, x2, y2
+    end
+
     def stroke_rectanlge(x,y,width,height)
       FFI::CP437Console.stroke_rectangle x, y, width, height
     end
@@ -61,6 +79,14 @@ module CP437
 
     def draw_window(x,y,width,height)
       FFI::CP437Console.draw_window x, y, width, height
+    end
+
+    def draw_thin_window(x,y,width,height)
+      FFI::CP437Console.draw_thin_window x, y, width, height
+    end
+
+    def draw_thick_window(x,y,width,height)
+      FFI::CP437Console.draw_thick_window x, y, width, height
     end
 
     def render(args,x,y,scale)
