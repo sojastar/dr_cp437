@@ -4,7 +4,7 @@
 #include <mruby/string.h>
 #include <mruby/data.h>
 #include <dragonruby.h>
-#include "app/cp437_console.c"
+#include "lib/cp437_console.c"
 
 // MRuby `typedef`s mrb_int in the mruby/value.h
 // Then `#define`s mrb_int in mruby.h

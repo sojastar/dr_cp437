@@ -1,4 +1,4 @@
-require 'app/cp437_console.rb'
+require 'lib/cp437_console.rb'
 
 RAND_SIZE       = 10000
 RAND            = RAND_SIZE.times.map { |i| rand }

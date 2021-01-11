@@ -1,5 +1,5 @@
 SOURCE=cp437_console
-SOURCE_PATH=app/
+SOURCE_PATH=lib/
 BINDER=../dragonruby-bind
 BINDER_FFI_MODULE=CP437Console
 BINDER_CFLAGS='-I /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include -I../include -I.'
