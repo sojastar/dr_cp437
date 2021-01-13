@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
-#include "cp437_8x8.h"
+//#include "cp437_8x8.h"
 #include <dragonruby.h>
+#include "cp437_console.h"
 
 
 
@@ -43,8 +44,8 @@
 /******************************************************************************/
 
 /* ---=== GENERAL : ===--- */
-typedef unsigned char Uint8;
-typedef unsigned int  Uint32;
+//typedef unsigned char Uint8;
+//typedef unsigned int  Uint32;
 
 /* ---=== FOR THE PIXEL ARRAY : ===--- */
 extern void *(*drb_symbol_lookup)(const char *sym);
@@ -58,6 +59,8 @@ typedef struct Glyph {
 } Glyph;
 
 typedef struct GraphicContext {
+  Font*   font;
+
   Uint32  background;
   Uint32  foreground;
   Uint8   index;
@@ -69,8 +72,6 @@ typedef struct GraphicContext {
   bool    should_draw_background;
   bool    should_draw_foreground;
   bool    should_draw_index;
-
-  bool    antialiased;
 
   Uint8   window_top_left_index;
   Uint8   window_top_right_index;
@@ -110,7 +111,8 @@ typedef struct Console {
 /******************************************************************************/
 /* FUNCTION PROTOTYPES :                                                      */
 /******************************************************************************/
-void print_console_pixels(void);
+Font* get_font_by_name(char* font_name);
+//void print_console_pixels(void);
 void draw_glyph_at(Uint32 x,Uint32 y);
 void draw_horizontal_line(Uint32 x1,Uint32 x2,Uint32 y);
 void draw_vertical_line(Uint32 x,Uint32 y1,Uint32 y2);
@@ -134,7 +136,7 @@ Console *console;
 
 /* ---=== CREATOR AND DESTRUCTOR : ===--- */
 DRB_FFI
-void init_console(Uint32 width,Uint32 height,Glyph init_glyph) {
+void init_console(Uint32 width,Uint32 height,char* font_name, Glyph init_glyph) {
   // --- Creating the console :
   console         = (Console *)malloc(sizeof(Console));
 
@@ -147,6 +149,8 @@ void init_console(Uint32 width,Uint32 height,Glyph init_glyph) {
   console->glyphs = (Glyph*)calloc(console->size, sizeof(Glyph));
 
   // --- Setting the graphic context :
+  console->graphic_context.font                       = get_font_by_name(font_name);
+
   console->graphic_context.background                 = init_glyph.background;
   console->graphic_context.foreground                 = init_glyph.foreground;
   console->graphic_context.index                      = init_glyph.index;
@@ -158,8 +162,6 @@ void init_console(Uint32 width,Uint32 height,Glyph init_glyph) {
   console->graphic_context.should_draw_background     = true;
   console->graphic_context.should_draw_foreground     = true;
   console->graphic_context.should_draw_index          = true;
-
-  console->graphic_context.antialiased                = false;
 
   console->graphic_context.window_top_left_index      = THICK_WINDOW_TOP_LEFT_INDEX;
   console->graphic_context.window_top_right_index     = THICK_WINDOW_TOP_RIGHT_INDEX;
@@ -186,14 +188,23 @@ void init_console(Uint32 width,Uint32 height,Glyph init_glyph) {
   console->drb_upload_pixel_array = drb_symbol_lookup("drb_upload_pixel_array");
 }
 
-void print_console_pixels(void) {
-  for(size_t i = 0; i < console->height * GLYPH_PIXEL_HEIGHT; i+=1) {
-    for(size_t j = 0; j < console->width * GLYPH_PIXEL_WIDTH; j+=1) {
-      printf("%u,", console->pixels[i * console->width * GLYPH_PIXEL_WIDTH + j]);
-    }
-    printf("\n");
+Font* get_font_by_name(char* font_name) {
+  for(size_t i = 0; i < fonts_count; i += 1) {
+    if(strcmp(fonts[i]->name, font_name) == 0)
+      return fonts[i];
   }
+
+  return NULL;
 }
+
+//void print_console_pixels(void) {
+//  for(size_t i = 0; i < console->height * GLYPH_PIXEL_HEIGHT; i+=1) {
+//    for(size_t j = 0; j < console->width * GLYPH_PIXEL_WIDTH; j+=1) {
+//      printf("%u,", console->pixels[i * console->width * GLYPH_PIXEL_WIDTH + j]);
+//    }
+//    printf("\n");
+//  }
+//}
 
 DRB_FFI
 void delete_console(void) {
@@ -255,11 +266,6 @@ void set_gc_foreground(Uint32 foreground) {
 }
 
 DRB_FFI
-void set_gc_antialiased(bool antialiased) {
-  console->graphic_context.antialiased = antialiased;
-}
-
-DRB_FFI
 void set_gc_clear_background(Uint32 background) {
   console->graphic_context.clear_background = background;
 }
@@ -286,7 +292,9 @@ void clear_console(void) {
       Uint32 y_offset = y * GLYPH_PIXEL_HEIGHT;
 
       for(size_t i = 0; i < GLYPH_PIXEL_HEIGHT; i+=1 ) {
-        Uint8 line = cp437_8x8[console->graphic_context.clear_index][i];
+        //Uint8 line = cp437_8x8[console->graphic_context.clear_index][i];
+        Uint8 index = console->graphic_context.clear_index;
+        Uint8 line  = *(console->graphic_context.font->glyph_data + FONTS_MAX_WIDTH * sizeof(Uint8) * index + i);
 
         for(size_t j = 0; j < GLYPH_PIXEL_WIDTH; j+=1) {
           Uint32 pixel_index            = ( y_offset + i ) * console->pixel_width + x_offset + j;
@@ -317,7 +325,9 @@ void draw_glyph_at(Uint32 x,Uint32 y) {
   Uint32 y_offset = y * GLYPH_PIXEL_HEIGHT;
 
   for(size_t i = 0; i < GLYPH_PIXEL_HEIGHT; i+=1 ) {
-    Uint8 line = cp437_8x8[console->glyphs[glyph_offset].index][i];
+    //Uint8 line = cp437_8x8[console->glyphs[glyph_offset].index][i];
+    Uint8 index = console->glyphs[glyph_offset].index;
+    Uint8 line  = *(console->graphic_context.font->glyph_data + FONTS_MAX_WIDTH * sizeof(Uint8) * index + i);
     for(size_t j = 0; j < GLYPH_PIXEL_WIDTH; j+=1) {
       Uint32 pixel_index            = ( y_offset + i ) * console->pixel_width + x_offset + j;
       console->pixels[pixel_index]  = ((line >> j) & 1 ) == true ? console->glyphs[glyph_offset].foreground : console->glyphs[glyph_offset].background;

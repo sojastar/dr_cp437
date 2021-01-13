@@ -5,13 +5,13 @@ module CP437
     attr_reader :width, :height,
                 :pixel_width, :pixel_height
 
-    def initialize(width,height,index,background,foreground)
+    def initialize(width,height,font,index,background,foreground)
       init_glyph            = FFI::CP437Console::Glyph.new
       init_glyph.index      = index 
       init_glyph.background = CP437::Color::pack_color *background
       init_glyph.foreground = CP437::Color::pack_color *foreground
 
-      FFI::CP437Console::init_console width, height, init_glyph
+      FFI::CP437Console::init_console width, height, font, init_glyph
 
       @width        = width
       @height       = height
@@ -20,8 +20,6 @@ module CP437
       @pixel_height = FFI::CP437Console.get_console_pixel_height
     end
 
-    #def width()           FFI::CP437Console.get_console_width   end
-    #def height()          FFI::CP437Console.get_console_height  end
     def get_glyph_at(x,y) FFI::CP437Console.get_glyph_at(x,y)   end
 
     def get_mouse_coords(args)

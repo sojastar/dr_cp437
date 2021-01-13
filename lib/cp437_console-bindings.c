@@ -39,6 +39,29 @@ static Uint32 drb_ffi__ZTSj_FromRuby(mrb_state *state, mrb_value self) {
 static mrb_value drb_ffi__ZTSj_ToRuby(mrb_state *state, Uint32 value) {
     return mrb_fixnum_value(value);
 }
+struct drb_foreign_object_ZTSPc {
+    drb_foreign_object_kind kind;
+    char *value;
+    int should_free;
+};
+static mrb_data_type ForeignObjectType_ZTSPc = {"char*", drb_free_foreign_object_indirect};
+static char *drb_ffi__ZTSPc_FromRuby(mrb_state *state, mrb_value self) {
+    if (mrb_nil_p(self))
+        return 0;
+    if (mrb_type(self) == MRB_TT_STRING)
+        return RSTRING_PTR(self);
+    return ((struct drb_foreign_object_ZTSPc *)DATA_PTR(self))->value;
+}
+static mrb_value drb_ffi__ZTSPc_ToRuby(mrb_state *state, char *value) {
+    struct drb_foreign_object_ZTSPc *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTSPc));
+    ptr->value = value;
+    ptr->kind = drb_foreign_object_kind_pointer;
+    struct RClass *FFI = mrb_module_get_f(state, "FFI");
+    struct RClass *module = mrb_module_get_under_f(state, FFI, "CP437Console");
+    struct RClass *klass = mrb_class_get_under_f(state, module, "CharPointer");
+    struct RData *rdata = mrb_data_object_alloc_f(state, klass, ptr, &ForeignObjectType_ZTSPc);
+    return mrb_obj_value(rdata);
+}
 struct drb_foreign_object_ZTS5Glyph {
     drb_foreign_object_kind kind;
     Glyph value;
@@ -68,6 +91,51 @@ static Uint8 drb_ffi__ZTSh_FromRuby(mrb_state *state, mrb_value self) {
 }
 static mrb_value drb_ffi__ZTSh_ToRuby(mrb_state *state, Uint8 value) {
     return mrb_fixnum_value(value);
+}
+static char drb_ffi__ZTSc_FromRuby(mrb_state *state, mrb_value self) {
+    return mrb_fixnum(self);
+}
+static mrb_value drb_ffi__ZTSc_ToRuby(mrb_state *state, char value) {
+    return mrb_fixnum_value(value);
+}
+static mrb_value drb_ffi__ZTSPc_New(mrb_state *mrb, mrb_value self) {
+    struct drb_foreign_object_ZTSPc *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTSPc));
+    ptr->kind = drb_foreign_object_kind_pointer;
+    ptr->value = calloc(1, sizeof(char));
+    ptr->should_free = 1;
+    struct RClass *FFI = mrb_module_get_f(mrb, "FFI");
+    struct RClass *module = mrb_module_get_under_f(mrb, FFI, "CP437Console");
+    struct RClass *klass = mrb_class_get_under_f(mrb, module, "CharPointer");
+    struct RData *rdata = mrb_data_object_alloc_f(mrb, klass, ptr, &ForeignObjectType_ZTSPc);
+    return mrb_obj_value(rdata);
+}
+static mrb_value drb_ffi__ZTSPc_GetValue(mrb_state *mrb, mrb_value value) {
+    return drb_ffi__ZTSc_ToRuby(mrb, *drb_ffi__ZTSPc_FromRuby(mrb, value));
+}
+static mrb_value drb_ffi__ZTSPc_IsNil(mrb_state *state, mrb_value self) {
+    if (drb_ffi__ZTSPc_FromRuby(state, self) == 0)
+        return mrb_true_value();
+    else
+        return mrb_false_value();
+}
+static mrb_value drb_ffi__ZTSPc_GetAt(mrb_state *mrb, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(mrb, "*", &args, &argc);
+    int index = drb_ffi__ZTSi_FromRuby(mrb, args[0]);
+    return drb_ffi__ZTSc_ToRuby(mrb, drb_ffi__ZTSPc_FromRuby(mrb, self)[index]);
+}
+static mrb_value drb_ffi__ZTSPc_SetAt(mrb_state *mrb, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(mrb, "*", &args, &argc);
+    int index = drb_ffi__ZTSi_FromRuby(mrb, args[0]);
+    char new_value = drb_ffi__ZTSc_FromRuby(mrb, args[1]);
+    drb_ffi__ZTSPc_FromRuby(mrb, self)[index] = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTSPc_GetString(mrb_state *state, mrb_value self) {
+    return mrb_str_new_cstr_f(state, drb_ffi__ZTSPc_FromRuby(state, self));
 }
 static mrb_value drb_ffi__ZTS5Glyph_New(mrb_state *state, mrb_value self) {
     struct drb_foreign_object_ZTS5Glyph *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTS5Glyph *));
@@ -119,8 +187,9 @@ static mrb_value drb_ffi_init_console_Binding(mrb_state *state, mrb_value value)
     mrb_get_args_f(state, "*", &args, &argc);
     Uint32 width_0 = drb_ffi__ZTSj_FromRuby(state, args[0]);
     Uint32 height_1 = drb_ffi__ZTSj_FromRuby(state, args[1]);
-    Glyph init_glyph_2 = drb_ffi__ZTS5Glyph_FromRuby(state, args[2]);
-    init_console(width_0, height_1, init_glyph_2);
+    char *font_name_2 = drb_ffi__ZTSPc_FromRuby(state, args[2]);
+    Glyph init_glyph_3 = drb_ffi__ZTS5Glyph_FromRuby(state, args[3]);
+    init_console(width_0, height_1, font_name_2, init_glyph_3);
     return mrb_nil_value();
 }
 static mrb_value drb_ffi_delete_console_Binding(mrb_state *state, mrb_value value) {
@@ -178,14 +247,6 @@ static mrb_value drb_ffi_set_gc_foreground_Binding(mrb_state *state, mrb_value v
     mrb_get_args_f(state, "*", &args, &argc);
     Uint32 foreground_0 = drb_ffi__ZTSj_FromRuby(state, args[0]);
     set_gc_foreground(foreground_0);
-    return mrb_nil_value();
-}
-static mrb_value drb_ffi_set_gc_antialiased_Binding(mrb_state *state, mrb_value value) {
-    mrb_value *args = 0;
-    mrb_int argc = 0;
-    mrb_get_args_f(state, "*", &args, &argc);
-    int antialiased_0 = drb_ffi__ZTSi_FromRuby(state, args[0]);
-    set_gc_antialiased(antialiased_0);
     return mrb_nil_value();
 }
 static mrb_value drb_ffi_set_gc_clear_background_Binding(mrb_state *state, mrb_value value) {
@@ -329,7 +390,7 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
         return;
     struct RClass *module = mrb_define_module_under_f(state, FFI, "CP437Console");
     struct RClass *object_class = state->object_class;
-    mrb_define_module_function_f(state, module, "init_console", drb_ffi_init_console_Binding, MRB_ARGS_REQ(3));
+    mrb_define_module_function_f(state, module, "init_console", drb_ffi_init_console_Binding, MRB_ARGS_REQ(4));
     mrb_define_module_function_f(state, module, "delete_console", drb_ffi_delete_console_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "update_console", drb_ffi_update_console_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_console_width", drb_ffi_get_console_width_Binding, MRB_ARGS_REQ(0));
@@ -340,7 +401,6 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_module_function_f(state, module, "set_gc_index", drb_ffi_set_gc_index_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_background", drb_ffi_set_gc_background_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_foreground", drb_ffi_set_gc_foreground_Binding, MRB_ARGS_REQ(1));
-    mrb_define_module_function_f(state, module, "set_gc_antialiased", drb_ffi_set_gc_antialiased_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_clear_background", drb_ffi_set_gc_clear_background_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_clear_foreground", drb_ffi_set_gc_clear_foreground_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_clear_index", drb_ffi_set_gc_clear_index_Binding, MRB_ARGS_REQ(1));
@@ -355,6 +415,13 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_module_function_f(state, module, "draw_window", drb_ffi_draw_window_Binding, MRB_ARGS_REQ(4));
     mrb_define_module_function_f(state, module, "draw_thin_window", drb_ffi_draw_thin_window_Binding, MRB_ARGS_REQ(4));
     mrb_define_module_function_f(state, module, "draw_thick_window", drb_ffi_draw_thick_window_Binding, MRB_ARGS_REQ(4));
+    struct RClass *CharPointerClass = mrb_define_class_under_f(state, module, "CharPointer", object_class);
+    mrb_define_class_method_f(state, CharPointerClass, "new", drb_ffi__ZTSPc_New, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, CharPointerClass, "value", drb_ffi__ZTSPc_GetValue, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, CharPointerClass, "[]", drb_ffi__ZTSPc_GetAt, MRB_ARGS_REQ(1));
+    mrb_define_method_f(state, CharPointerClass, "[]=", drb_ffi__ZTSPc_SetAt, MRB_ARGS_REQ(2));
+    mrb_define_method_f(state, CharPointerClass, "nil?", drb_ffi__ZTSPc_IsNil, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, CharPointerClass, "str", drb_ffi__ZTSPc_GetString, MRB_ARGS_REQ(0));
     struct RClass *GlyphClass = mrb_define_class_under_f(state, module, "Glyph", object_class);
     mrb_define_class_method_f(state, GlyphClass, "new", drb_ffi__ZTS5Glyph_New, MRB_ARGS_REQ(0));
     mrb_define_method_f(state, GlyphClass, "foreground", drb_ffi__ZTS5Glyph_foreground_Get, MRB_ARGS_REQ(0));

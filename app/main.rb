@@ -10,6 +10,7 @@ CONSOLE_HEIGHT  = 90
 def setup(args)
   args.state.console    = CP437::Console.new  CONSOLE_WIDTH,
                                               CONSOLE_HEIGHT,
+                                              "cp437_8x8",
                                               250,  # nice smile
                                               [0, 0, 0, 255],
                                               [64, 64, 64, 255]
