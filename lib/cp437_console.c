@@ -288,15 +288,14 @@ DRB_FFI
 void clear_console(void) {
   for(size_t y = 0; y < console->height; y+=1) {
     for(size_t x = 0; x < console->width; x+=1) {
-      Uint32 x_offset = x * GLYPH_PIXEL_WIDTH;
-      Uint32 y_offset = y * GLYPH_PIXEL_HEIGHT;
+      Uint32 x_offset = x * console->graphic_context.font->width;
+      Uint32 y_offset = y * console->graphic_context.font->height;
 
-      for(size_t i = 0; i < GLYPH_PIXEL_HEIGHT; i+=1 ) {
-        //Uint8 line = cp437_8x8[console->graphic_context.clear_index][i];
+      for(size_t i = 0; i < console->graphic_context.font->height; i+=1 ) {
         Uint8 index = console->graphic_context.clear_index;
         Uint8 line  = *(console->graphic_context.font->glyph_data + FONTS_MAX_WIDTH * sizeof(Uint8) * index + i);
 
-        for(size_t j = 0; j < GLYPH_PIXEL_WIDTH; j+=1) {
+        for(size_t j = 0; j < console->graphic_context.font->height; j+=1) {
           Uint32 pixel_index            = ( y_offset + i ) * console->pixel_width + x_offset + j;
           console->pixels[pixel_index]  = ((line >> j) & 1 ) == true ? console->graphic_context.clear_foreground : console->graphic_context.clear_background;
         }
@@ -321,14 +320,13 @@ void draw_glyph_at(Uint32 x,Uint32 y) {
     console->glyphs[glyph_offset].foreground  = console->graphic_context.foreground;
 
   // --- Drawing the pixels :
-  Uint32 x_offset = x * GLYPH_PIXEL_WIDTH;
-  Uint32 y_offset = y * GLYPH_PIXEL_HEIGHT;
+  Uint32 x_offset = x * console->graphic_context.font->width;
+  Uint32 y_offset = y * console->graphic_context.font->height;
 
-  for(size_t i = 0; i < GLYPH_PIXEL_HEIGHT; i+=1 ) {
-    //Uint8 line = cp437_8x8[console->glyphs[glyph_offset].index][i];
+  for(size_t i = 0; i < console->graphic_context.font->height; i+=1 ) {
     Uint8 index = console->glyphs[glyph_offset].index;
     Uint8 line  = *(console->graphic_context.font->glyph_data + FONTS_MAX_WIDTH * sizeof(Uint8) * index + i);
-    for(size_t j = 0; j < GLYPH_PIXEL_WIDTH; j+=1) {
+    for(size_t j = 0; j < console->graphic_context.font->width; j+=1) {
       Uint32 pixel_index            = ( y_offset + i ) * console->pixel_width + x_offset + j;
       console->pixels[pixel_index]  = ((line >> j) & 1 ) == true ? console->glyphs[glyph_offset].foreground : console->glyphs[glyph_offset].background;
     }
