@@ -86,6 +86,24 @@ static int drb_ffi__ZTSi_FromRuby(mrb_state *state, mrb_value self) {
 static mrb_value drb_ffi__ZTSi_ToRuby(mrb_state *state, int value) {
     return mrb_fixnum_value(value);
 }
+struct drb_foreign_object_ZTS4Font {
+    drb_foreign_object_kind kind;
+    Font value;
+};
+static mrb_data_type ForeignObjectType_ZTS4Font = {"Font", drb_free_foreign_object_indirect};
+static Font drb_ffi__ZTS4Font_FromRuby(mrb_state *state, mrb_value self) {
+    return ((struct drb_foreign_object_ZTS4Font *)DATA_PTR(self))->value;
+}
+static mrb_value drb_ffi__ZTS4Font_ToRuby(mrb_state *state, Font value) {
+    struct drb_foreign_object_ZTS4Font *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTS4Font));
+    ptr->value = value;
+    ptr->kind = drb_foreign_object_kind_struct;
+    struct RClass *FFI = mrb_module_get_f(state, "FFI");
+    struct RClass *module = mrb_module_get_under_f(state, FFI, "CP437Console");
+    struct RClass *klass = mrb_class_get_under_f(state, module, "Font");
+    struct RData *rdata = mrb_data_object_alloc_f(state, klass, ptr, &ForeignObjectType_ZTS4Font);
+    return mrb_obj_value(rdata);
+}
 static Uint8 drb_ffi__ZTSh_FromRuby(mrb_state *state, mrb_value self) {
     return mrb_fixnum(self);
 }
@@ -97,6 +115,29 @@ static char drb_ffi__ZTSc_FromRuby(mrb_state *state, mrb_value self) {
 }
 static mrb_value drb_ffi__ZTSc_ToRuby(mrb_state *state, char value) {
     return mrb_fixnum_value(value);
+}
+struct drb_foreign_object_ZTSPh {
+    drb_foreign_object_kind kind;
+    Uint8 *value;
+    int should_free;
+};
+static mrb_data_type ForeignObjectType_ZTSPh = {"unsigned char*", drb_free_foreign_object_indirect};
+static Uint8 *drb_ffi__ZTSPh_FromRuby(mrb_state *state, mrb_value self) {
+    if (mrb_nil_p(self))
+        return 0;
+    if (mrb_type(self) == MRB_TT_STRING)
+        return RSTRING_PTR(self);
+    return ((struct drb_foreign_object_ZTSPh *)DATA_PTR(self))->value;
+}
+static mrb_value drb_ffi__ZTSPh_ToRuby(mrb_state *state, Uint8 *value) {
+    struct drb_foreign_object_ZTSPh *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTSPh));
+    ptr->value = value;
+    ptr->kind = drb_foreign_object_kind_pointer;
+    struct RClass *FFI = mrb_module_get_f(state, "FFI");
+    struct RClass *module = mrb_module_get_under_f(state, FFI, "CP437Console");
+    struct RClass *klass = mrb_class_get_under_f(state, module, "Unsigned_charPointer");
+    struct RData *rdata = mrb_data_object_alloc_f(state, klass, ptr, &ForeignObjectType_ZTSPh);
+    return mrb_obj_value(rdata);
 }
 static mrb_value drb_ffi__ZTSPc_New(mrb_state *mrb, mrb_value self) {
     struct drb_foreign_object_ZTSPc *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTSPc));
@@ -136,6 +177,45 @@ static mrb_value drb_ffi__ZTSPc_SetAt(mrb_state *mrb, mrb_value self) {
 }
 static mrb_value drb_ffi__ZTSPc_GetString(mrb_state *state, mrb_value self) {
     return mrb_str_new_cstr_f(state, drb_ffi__ZTSPc_FromRuby(state, self));
+}
+static mrb_value drb_ffi__ZTSPh_New(mrb_state *mrb, mrb_value self) {
+    struct drb_foreign_object_ZTSPh *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTSPh));
+    ptr->kind = drb_foreign_object_kind_pointer;
+    ptr->value = calloc(1, sizeof(Uint8));
+    ptr->should_free = 1;
+    struct RClass *FFI = mrb_module_get_f(mrb, "FFI");
+    struct RClass *module = mrb_module_get_under_f(mrb, FFI, "CP437Console");
+    struct RClass *klass = mrb_class_get_under_f(mrb, module, "Unsigned_charPointer");
+    struct RData *rdata = mrb_data_object_alloc_f(mrb, klass, ptr, &ForeignObjectType_ZTSPh);
+    return mrb_obj_value(rdata);
+}
+static mrb_value drb_ffi__ZTSPh_GetValue(mrb_state *mrb, mrb_value value) {
+    return drb_ffi__ZTSh_ToRuby(mrb, *drb_ffi__ZTSPh_FromRuby(mrb, value));
+}
+static mrb_value drb_ffi__ZTSPh_IsNil(mrb_state *state, mrb_value self) {
+    if (drb_ffi__ZTSPh_FromRuby(state, self) == 0)
+        return mrb_true_value();
+    else
+        return mrb_false_value();
+}
+static mrb_value drb_ffi__ZTSPh_GetAt(mrb_state *mrb, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(mrb, "*", &args, &argc);
+    int index = drb_ffi__ZTSi_FromRuby(mrb, args[0]);
+    return drb_ffi__ZTSh_ToRuby(mrb, drb_ffi__ZTSPh_FromRuby(mrb, self)[index]);
+}
+static mrb_value drb_ffi__ZTSPh_SetAt(mrb_state *mrb, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(mrb, "*", &args, &argc);
+    int index = drb_ffi__ZTSi_FromRuby(mrb, args[0]);
+    Uint8 new_value = drb_ffi__ZTSh_FromRuby(mrb, args[1]);
+    drb_ffi__ZTSPh_FromRuby(mrb, self)[index] = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTSPh_GetString(mrb_state *state, mrb_value self) {
+    return mrb_str_new_cstr_f(state, drb_ffi__ZTSPh_FromRuby(state, self));
 }
 static mrb_value drb_ffi__ZTS5Glyph_New(mrb_state *state, mrb_value self) {
     struct drb_foreign_object_ZTS5Glyph *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTS5Glyph *));
@@ -181,6 +261,62 @@ static mrb_value drb_ffi__ZTS5Glyph_index_Set(mrb_state *state, mrb_value self) 
     (&((struct drb_foreign_object_ZTS5Glyph *)DATA_PTR(self))->value)->index = new_value;
     return mrb_nil_value();
 }
+static mrb_value drb_ffi__ZTS4Font_New(mrb_state *state, mrb_value self) {
+    struct drb_foreign_object_ZTS4Font *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTS4Font *));
+    struct RClass *FFI = mrb_module_get_f(state, "FFI");
+    struct RClass *module = mrb_module_get_under_f(state, FFI, "CP437Console");
+    struct RClass *klass = mrb_class_get_under_f(state, module, "Font");
+    struct RData *rdata = mrb_data_object_alloc_f(state, klass, ptr, &ForeignObjectType_ZTS4Font);
+    return mrb_obj_value(rdata);
+}
+static mrb_value drb_ffi__ZTS4Font_name_Get(mrb_state *state, mrb_value self) {
+    Font record = drb_ffi__ZTS4Font_FromRuby(state, self);
+    return drb_ffi__ZTSPc_ToRuby(state, record.name);
+}
+static mrb_value drb_ffi__ZTS4Font_name_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    char *new_value = drb_ffi__ZTSPc_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS4Font *)DATA_PTR(self))->value)->name = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTS4Font_width_Get(mrb_state *state, mrb_value self) {
+    Font record = drb_ffi__ZTS4Font_FromRuby(state, self);
+    return drb_ffi__ZTSh_ToRuby(state, record.width);
+}
+static mrb_value drb_ffi__ZTS4Font_width_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint8 new_value = drb_ffi__ZTSh_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS4Font *)DATA_PTR(self))->value)->width = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTS4Font_height_Get(mrb_state *state, mrb_value self) {
+    Font record = drb_ffi__ZTS4Font_FromRuby(state, self);
+    return drb_ffi__ZTSh_ToRuby(state, record.height);
+}
+static mrb_value drb_ffi__ZTS4Font_height_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint8 new_value = drb_ffi__ZTSh_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS4Font *)DATA_PTR(self))->value)->height = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTS4Font_glyph_data_Get(mrb_state *state, mrb_value self) {
+    Font record = drb_ffi__ZTS4Font_FromRuby(state, self);
+    return drb_ffi__ZTSPh_ToRuby(state, record.glyph_data);
+}
+static mrb_value drb_ffi__ZTS4Font_glyph_data_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint8 *new_value = drb_ffi__ZTSPh_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS4Font *)DATA_PTR(self))->value)->glyph_data = new_value;
+    return mrb_nil_value();
+}
 static mrb_value drb_ffi_init_console_Binding(mrb_state *state, mrb_value value) {
     mrb_value *args = 0;
     mrb_int argc = 0;
@@ -196,15 +332,6 @@ static mrb_value drb_ffi_delete_console_Binding(mrb_state *state, mrb_value valu
     delete_console();
     return mrb_nil_value();
 }
-static mrb_value drb_ffi_resize_console_Binding(mrb_state *state, mrb_value value) {
-    mrb_value *args = 0;
-    mrb_int argc = 0;
-    mrb_get_args_f(state, "*", &args, &argc);
-    Uint32 width_0 = drb_ffi__ZTSj_FromRuby(state, args[0]);
-    Uint32 height_1 = drb_ffi__ZTSj_FromRuby(state, args[1]);
-    resize_console(width_0, height_1);
-    return mrb_nil_value();
-}
 static mrb_value drb_ffi_update_console_Binding(mrb_state *state, mrb_value value) {
     update_console();
     return mrb_nil_value();
@@ -217,15 +344,6 @@ static mrb_value drb_ffi_get_console_height_Binding(mrb_state *state, mrb_value 
     int ret_val = get_console_height();
     return drb_ffi__ZTSi_ToRuby(state, ret_val);
 }
-static mrb_value drb_ffi_get_glyph_at_Binding(mrb_state *state, mrb_value value) {
-    mrb_value *args = 0;
-    mrb_int argc = 0;
-    mrb_get_args_f(state, "*", &args, &argc);
-    Uint32 x_0 = drb_ffi__ZTSj_FromRuby(state, args[0]);
-    Uint32 y_1 = drb_ffi__ZTSj_FromRuby(state, args[1]);
-    Glyph ret_val = get_glyph_at(x_0, y_1);
-    return drb_ffi__ZTS5Glyph_ToRuby(state, ret_val);
-}
 static mrb_value drb_ffi_get_console_pixel_width_Binding(mrb_state *state, mrb_value value) {
     int ret_val = get_console_pixel_width();
     return drb_ffi__ZTSi_ToRuby(state, ret_val);
@@ -233,6 +351,27 @@ static mrb_value drb_ffi_get_console_pixel_width_Binding(mrb_state *state, mrb_v
 static mrb_value drb_ffi_get_console_pixel_height_Binding(mrb_state *state, mrb_value value) {
     int ret_val = get_console_pixel_height();
     return drb_ffi__ZTSi_ToRuby(state, ret_val);
+}
+static mrb_value drb_ffi_resize_console_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 width_0 = drb_ffi__ZTSj_FromRuby(state, args[0]);
+    Uint32 height_1 = drb_ffi__ZTSj_FromRuby(state, args[1]);
+    resize_console(width_0, height_1);
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi_get_current_font_Binding(mrb_state *state, mrb_value value) {
+    Font ret_val = get_current_font();
+    return drb_ffi__ZTS4Font_ToRuby(state, ret_val);
+}
+static mrb_value drb_ffi_set_gc_font_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    char *font_name_0 = drb_ffi__ZTSPc_FromRuby(state, args[0]);
+    set_gc_font(font_name_0);
+    return mrb_nil_value();
 }
 static mrb_value drb_ffi_set_gc_index_Binding(mrb_state *state, mrb_value value) {
     mrb_value *args = 0;
@@ -282,17 +421,18 @@ static mrb_value drb_ffi_set_gc_clear_index_Binding(mrb_state *state, mrb_value 
     set_gc_clear_index(index_0);
     return mrb_nil_value();
 }
-static mrb_value drb_ffi_set_gc_font_Binding(mrb_state *state, mrb_value value) {
-    mrb_value *args = 0;
-    mrb_int argc = 0;
-    mrb_get_args_f(state, "*", &args, &argc);
-    char *font_name_0 = drb_ffi__ZTSPc_FromRuby(state, args[0]);
-    set_gc_font(font_name_0);
-    return mrb_nil_value();
-}
 static mrb_value drb_ffi_clear_console_Binding(mrb_state *state, mrb_value value) {
     clear_console();
     return mrb_nil_value();
+}
+static mrb_value drb_ffi_get_glyph_at_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 x_0 = drb_ffi__ZTSj_FromRuby(state, args[0]);
+    Uint32 y_1 = drb_ffi__ZTSj_FromRuby(state, args[1]);
+    Glyph ret_val = get_glyph_at(x_0, y_1);
+    return drb_ffi__ZTS5Glyph_ToRuby(state, ret_val);
 }
 static mrb_value drb_ffi_draw_glyph_at_Binding(mrb_state *state, mrb_value value) {
     mrb_value *args = 0;
@@ -409,21 +549,22 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     struct RClass *object_class = state->object_class;
     mrb_define_module_function_f(state, module, "init_console", drb_ffi_init_console_Binding, MRB_ARGS_REQ(4));
     mrb_define_module_function_f(state, module, "delete_console", drb_ffi_delete_console_Binding, MRB_ARGS_REQ(0));
-    mrb_define_module_function_f(state, module, "resize_console", drb_ffi_resize_console_Binding, MRB_ARGS_REQ(2));
     mrb_define_module_function_f(state, module, "update_console", drb_ffi_update_console_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_console_width", drb_ffi_get_console_width_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_console_height", drb_ffi_get_console_height_Binding, MRB_ARGS_REQ(0));
-    mrb_define_module_function_f(state, module, "get_glyph_at", drb_ffi_get_glyph_at_Binding, MRB_ARGS_REQ(2));
     mrb_define_module_function_f(state, module, "get_console_pixel_width", drb_ffi_get_console_pixel_width_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_console_pixel_height", drb_ffi_get_console_pixel_height_Binding, MRB_ARGS_REQ(0));
+    mrb_define_module_function_f(state, module, "resize_console", drb_ffi_resize_console_Binding, MRB_ARGS_REQ(2));
+    mrb_define_module_function_f(state, module, "get_current_font", drb_ffi_get_current_font_Binding, MRB_ARGS_REQ(0));
+    mrb_define_module_function_f(state, module, "set_gc_font", drb_ffi_set_gc_font_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_index", drb_ffi_set_gc_index_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_background", drb_ffi_set_gc_background_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_foreground", drb_ffi_set_gc_foreground_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_clear_background", drb_ffi_set_gc_clear_background_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_clear_foreground", drb_ffi_set_gc_clear_foreground_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_clear_index", drb_ffi_set_gc_clear_index_Binding, MRB_ARGS_REQ(1));
-    mrb_define_module_function_f(state, module, "set_gc_font", drb_ffi_set_gc_font_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "clear_console", drb_ffi_clear_console_Binding, MRB_ARGS_REQ(0));
+    mrb_define_module_function_f(state, module, "get_glyph_at", drb_ffi_get_glyph_at_Binding, MRB_ARGS_REQ(2));
     mrb_define_module_function_f(state, module, "draw_glyph_at", drb_ffi_draw_glyph_at_Binding, MRB_ARGS_REQ(2));
     mrb_define_module_function_f(state, module, "draw_horizontal_line", drb_ffi_draw_horizontal_line_Binding, MRB_ARGS_REQ(3));
     mrb_define_module_function_f(state, module, "draw_vertical_line", drb_ffi_draw_vertical_line_Binding, MRB_ARGS_REQ(3));
@@ -441,6 +582,13 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_method_f(state, CharPointerClass, "[]=", drb_ffi__ZTSPc_SetAt, MRB_ARGS_REQ(2));
     mrb_define_method_f(state, CharPointerClass, "nil?", drb_ffi__ZTSPc_IsNil, MRB_ARGS_REQ(0));
     mrb_define_method_f(state, CharPointerClass, "str", drb_ffi__ZTSPc_GetString, MRB_ARGS_REQ(0));
+    struct RClass *Unsigned_charPointerClass = mrb_define_class_under_f(state, module, "Unsigned_charPointer", object_class);
+    mrb_define_class_method_f(state, Unsigned_charPointerClass, "new", drb_ffi__ZTSPh_New, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, Unsigned_charPointerClass, "value", drb_ffi__ZTSPh_GetValue, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, Unsigned_charPointerClass, "[]", drb_ffi__ZTSPh_GetAt, MRB_ARGS_REQ(1));
+    mrb_define_method_f(state, Unsigned_charPointerClass, "[]=", drb_ffi__ZTSPh_SetAt, MRB_ARGS_REQ(2));
+    mrb_define_method_f(state, Unsigned_charPointerClass, "nil?", drb_ffi__ZTSPh_IsNil, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, Unsigned_charPointerClass, "str", drb_ffi__ZTSPh_GetString, MRB_ARGS_REQ(0));
     struct RClass *GlyphClass = mrb_define_class_under_f(state, module, "Glyph", object_class);
     mrb_define_class_method_f(state, GlyphClass, "new", drb_ffi__ZTS5Glyph_New, MRB_ARGS_REQ(0));
     mrb_define_method_f(state, GlyphClass, "foreground", drb_ffi__ZTS5Glyph_foreground_Get, MRB_ARGS_REQ(0));
@@ -449,6 +597,16 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_method_f(state, GlyphClass, "background=", drb_ffi__ZTS5Glyph_background_Set, MRB_ARGS_REQ(1));
     mrb_define_method_f(state, GlyphClass, "index", drb_ffi__ZTS5Glyph_index_Get, MRB_ARGS_REQ(0));
     mrb_define_method_f(state, GlyphClass, "index=", drb_ffi__ZTS5Glyph_index_Set, MRB_ARGS_REQ(1));
+    struct RClass *FontClass = mrb_define_class_under_f(state, module, "Font", object_class);
+    mrb_define_class_method_f(state, FontClass, "new", drb_ffi__ZTS4Font_New, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, FontClass, "name", drb_ffi__ZTS4Font_name_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, FontClass, "name=", drb_ffi__ZTS4Font_name_Set, MRB_ARGS_REQ(1));
+    mrb_define_method_f(state, FontClass, "width", drb_ffi__ZTS4Font_width_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, FontClass, "width=", drb_ffi__ZTS4Font_width_Set, MRB_ARGS_REQ(1));
+    mrb_define_method_f(state, FontClass, "height", drb_ffi__ZTS4Font_height_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, FontClass, "height=", drb_ffi__ZTS4Font_height_Set, MRB_ARGS_REQ(1));
+    mrb_define_method_f(state, FontClass, "glyph_data", drb_ffi__ZTS4Font_glyph_data_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, FontClass, "glyph_data=", drb_ffi__ZTS4Font_glyph_data_Set, MRB_ARGS_REQ(1));
 }
 static int drb_ffi_init_indirect_functions(void *(*lookup)(const char *fnname)) {
   drb_symbol_lookup = lookup;

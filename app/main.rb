@@ -14,7 +14,9 @@ FONT_LIST       = [ "cp437_8x8",
 def setup(args)
   args.state.font_index = 0
 
-  args.state.console    = CP437::Console.new  CONSOLE_WIDTH,
+  args.state.console    = CP437::Console.new  0, 0,
+                                              1,
+                                              CONSOLE_WIDTH,
                                               CONSOLE_HEIGHT,
                                               FONT_LIST[args.state.font_index],
                                               250,  # nice smile
@@ -39,13 +41,13 @@ def setup(args)
 
   16.times do |i|
     16.times do |j|
-      args.state.console.set_current_glyph_index  ( j + 16 * i )
-      args.state.console.draw_glyph_at            j, i
+      args.state.console.current_glyph_index  = j + 16 * i
+      args.state.console.draw_glyph_at j, i
     end
   end
   
-  args.state.console.set_current_background [ 0, 0, 0, 255 ]
-  args.state.console.set_current_foreground [ 255, 255, 255, 255 ]
+  args.state.console.current_background = [ 0, 0, 0, 255 ]
+  args.state.console.current_foreground = [ 255, 255, 255, 255 ]
 
   args.state.setup_done = true
 end
@@ -67,13 +69,23 @@ def tick(args)
   #args.state.console.draw_antialiased_line CONSOLE_WIDTH>>1, CONSOLE_HEIGHT>>1, line_end[0], line_end[1]
 
   if args.inputs.keyboard.key_down.space then
-    args.state.font_index = ( args.state.font_index + 1 ) % FONT_LIST.length
-    args.state.console.set_font FONT_LIST[args.state.font_index]
+    args.state.font_index   = ( args.state.font_index + 1 ) % FONT_LIST.length
+    args.state.console.font = FONT_LIST[args.state.font_index]
   end
 
-  args.state.console.update
+  if args.inputs.keyboard.key_down.plus then
+    new_width   = args.state.console.width  + 1
+    new_height  = args.state.console.height + 1
+    args.state.console.resize new_width, new_height
+  end
 
-  args.state.console.render(args, 0, 0, 1)
+  if args.inputs.keyboard.key_down.hyphen then
+    new_width   = args.state.console.width  - 1
+    new_height  = args.state.console.height - 1
+    args.state.console.resize new_width, new_height
+  end
+
+  args.state.console.render(args)
 
   #args.outputs.primitives << args.gtk.current_framerate_primitives
 end
