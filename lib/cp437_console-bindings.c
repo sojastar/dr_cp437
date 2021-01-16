@@ -443,6 +443,16 @@ static mrb_value drb_ffi_draw_glyph_at_Binding(mrb_state *state, mrb_value value
     draw_glyph_at(x_0, y_1);
     return mrb_nil_value();
 }
+static mrb_value drb_ffi_draw_string_at_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    char *string_0 = drb_ffi__ZTSPc_FromRuby(state, args[0]);
+    Uint32 x_1 = drb_ffi__ZTSj_FromRuby(state, args[1]);
+    Uint32 y_2 = drb_ffi__ZTSj_FromRuby(state, args[2]);
+    draw_string_at(string_0, x_1, y_2);
+    return mrb_nil_value();
+}
 static mrb_value drb_ffi_draw_horizontal_line_Binding(mrb_state *state, mrb_value value) {
     mrb_value *args = 0;
     mrb_int argc = 0;
@@ -566,6 +576,7 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_module_function_f(state, module, "clear_console", drb_ffi_clear_console_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_glyph_at", drb_ffi_get_glyph_at_Binding, MRB_ARGS_REQ(2));
     mrb_define_module_function_f(state, module, "draw_glyph_at", drb_ffi_draw_glyph_at_Binding, MRB_ARGS_REQ(2));
+    mrb_define_module_function_f(state, module, "draw_string_at", drb_ffi_draw_string_at_Binding, MRB_ARGS_REQ(3));
     mrb_define_module_function_f(state, module, "draw_horizontal_line", drb_ffi_draw_horizontal_line_Binding, MRB_ARGS_REQ(3));
     mrb_define_module_function_f(state, module, "draw_vertical_line", drb_ffi_draw_vertical_line_Binding, MRB_ARGS_REQ(3));
     mrb_define_module_function_f(state, module, "draw_line", drb_ffi_draw_line_Binding, MRB_ARGS_REQ(4));

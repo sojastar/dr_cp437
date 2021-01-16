@@ -100,6 +100,7 @@ module CP437
 
     # --- Strings :
     def draw_string_at(string,x,y)
+      FFI::CP437Console.draw_string_at string, x, y
     end
 
     # --- Lines :

@@ -259,6 +259,16 @@ void draw_glyph_at(Uint32 x,Uint32 y) {
 }
 
 
+// --- Strings :
+DRB_FFI
+void draw_string_at(char* const string,Uint32 x,Uint32 y) {
+  for(size_t i = 0; i < strlen(string); i += 1) {
+    set_gc_index((Uint8)string[i]);
+    draw_glyph_at(x + i, y);
+  }
+}
+
+
 // --- Lines :
 DRB_FFI
 void draw_horizontal_line(Uint32 x1,Uint32 x2,Uint32 y) {

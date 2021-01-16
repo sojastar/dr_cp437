@@ -46,6 +46,8 @@ def setup(args)
     end
   end
   
+  args.state.console.draw_string_at "bite au cul !?!", 20, 10
+
   args.state.console.current_background = [ 0, 0, 0, 255 ]
   args.state.console.current_foreground = [ 255, 255, 255, 255 ]
 

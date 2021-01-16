@@ -136,6 +136,9 @@ void clear_console(void);
 Glyph get_glyph_at(Uint32 x,Uint32 y);
 void draw_glyph_at(Uint32 x,Uint32 y);
 
+// --- Strings :
+void draw_string_at(char* const string,Uint32 x,Uint32 y);
+
 // --- Lines :
 void draw_horizontal_line(Uint32 x1,Uint32 x2,Uint32 y);
 void draw_vertical_line(Uint32 x,Uint32 y1,Uint32 y2);
