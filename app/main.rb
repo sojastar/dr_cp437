@@ -4,13 +4,19 @@ RAND_SIZE       = 10000
 RAND            = RAND_SIZE.times.map { |i| rand }
 @rand_index     = rand RAND_SIZE
 
-CONSOLE_WIDTH   = 160
-CONSOLE_HEIGHT  = 90
+CONSOLE_WIDTH   = 80#160
+CONSOLE_HEIGHT  = 45#90
+
+FONT_LIST       = [ "cp437_8x8",
+                    "cp437_8x14",
+                    "cp437_8x16" ]
 
 def setup(args)
+  args.state.font_index = 0
+
   args.state.console    = CP437::Console.new  CONSOLE_WIDTH,
                                               CONSOLE_HEIGHT,
-                                              "cp437_8x8",
+                                              FONT_LIST[args.state.font_index],
                                               250,  # nice smile
                                               [0, 0, 0, 255],
                                               [64, 64, 64, 255]
@@ -30,6 +36,13 @@ def setup(args)
   #args.state.console.draw_window               1,  1, 12, 8
   #args.state.console.draw_thin_window         14,  1, 12, 8
   #args.state.console.draw_thick_window         1, 10, 12, 8
+
+  16.times do |i|
+    16.times do |j|
+      args.state.console.set_current_glyph_index  ( j + 16 * i )
+      args.state.console.draw_glyph_at            j, i
+    end
+  end
   
   args.state.console.set_current_background [ 0, 0, 0, 255 ]
   args.state.console.set_current_foreground [ 255, 255, 255, 255 ]
@@ -47,10 +60,16 @@ def tick(args)
   #new_y     = rand CONSOLE_HEIGHT
   #args.state.console.draw_glyph_at new_x, new_y
 
-  args.state.console.clear_console
+  #args.state.console.clear
 
-  line_end = args.state.console.get_mouse_coords(args)
-  args.state.console.draw_antialiased_line 80, 45, line_end[0], line_end[1]
+  #line_end = [ args.state.console.get_mouse_coords(args)[0]>>1,
+  #             args.state.console.get_mouse_coords(args)[1]>>1 ]
+  #args.state.console.draw_antialiased_line CONSOLE_WIDTH>>1, CONSOLE_HEIGHT>>1, line_end[0], line_end[1]
+
+  if args.inputs.keyboard.key_down.space then
+    args.state.font_index = ( args.state.font_index + 1 ) % FONT_LIST.length
+    args.state.console.set_font FONT_LIST[args.state.font_index]
+  end
 
   args.state.console.update
 

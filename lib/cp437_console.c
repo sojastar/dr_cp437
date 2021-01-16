@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
-//#include "cp437_8x8.h"
 #include <dragonruby.h>
 #include "cp437_console.h"
 
@@ -13,9 +12,6 @@
 /******************************************************************************/
 /* CONSTANTS :                                                                */
 /******************************************************************************/
-#define GLYPH_PIXEL_WIDTH                   8
-#define GLYPH_PIXEL_HEIGHT                  8
-
 #define LINE_BOTTOM_LEFT_TO_TOP_RIGHT_GLYPH 47
 #define LINE_TOP_LEFT_TO_BOTTOM_RIGHT_GLYPH 92
 #define LINE_HORIZONTAL_GLYPH               45
@@ -171,15 +167,13 @@ void init_console(Uint32 width,Uint32 height,char* font_name, Glyph init_glyph) 
   console->graphic_context.window_left_right_index    = THICK_WINDOW_LEFT_RIGHT_INDEX;
 
   // --- Setting the console's pixel array :
-  console->pixel_width  = width  * GLYPH_PIXEL_WIDTH;
-  console->pixel_height = height * GLYPH_PIXEL_HEIGHT;
+  console->pixel_width  = width  * console->graphic_context.font->width;
+  console->pixel_height = height * console->graphic_context.font->height;
   console->pixels       = (Uint32*)calloc(console->pixel_width * console->pixel_height, sizeof(Uint32));
 
-  for(size_t i = 0; i < height; i+=1) {
-    for(size_t j = 0; j < width; j+=1) {
+  for(size_t i = 0; i < console->height; i+=1)
+    for(size_t j = 0; j < console->width; j+=1)
       draw_glyph_at(j, i);
-    }
-  }
 
   // --- Miscellaneous :
   console->left_scan  = (Uint32*)malloc(height * sizeof(Uint32));
@@ -213,6 +207,11 @@ void delete_console(void) {
   free(console);
 }
 
+DRB_FFI
+void resize_console(Uint32 width,Uint32 height) {
+
+}
+
 
 /* ---=== UPDATE : ===--- */
 DRB_FFI
@@ -234,18 +233,17 @@ int get_console_height(void) {
 
 DRB_FFI
 Glyph get_glyph_at(Uint32 x,Uint32 y) {
-  int index = x + console->width * y;
-  return console->glyphs[index];
+  return console->glyphs[x + console->width * y];
 }
 
 DRB_FFI
 int get_console_pixel_width(void) {
-  return GLYPH_PIXEL_WIDTH * console->width;
+  return console->graphic_context.font->width * console->width;
 }
 
 DRB_FFI
 int get_console_pixel_height(void) {
-  return GLYPH_PIXEL_HEIGHT * console->height;
+  return console->graphic_context.font->height * console->height;
 }
 
 
@@ -280,28 +278,53 @@ void set_gc_clear_index(Uint8 index) {
   console->graphic_context.clear_index = index;
 }
 
+DRB_FFI
+void set_gc_font(char* const font_name) {
+  console->graphic_context.font = get_font_by_name(font_name);
+
+  // --- Resetting the console's pixel array :
+  free(console->pixels);
+
+  console->pixel_width  = console->width  * console->graphic_context.font->width;
+  console->pixel_height = console->height * console->graphic_context.font->height;
+  console->pixels       = (Uint32*)calloc(console->pixel_width * console->pixel_height, sizeof(Uint32));
+
+  for(size_t i = 0; i < console->height; i+=1) {
+    for(size_t j = 0; j < console->width; j+=1) {
+      Glyph glyph = console->glyphs[j + console->width * i];
+      console->graphic_context.index      = glyph.index;
+      console->graphic_context.foreground = glyph.foreground;
+      console->graphic_context.background = glyph.background;
+      draw_glyph_at(j, i);
+    }
+  }
+}
+
 
 /* ---=== DRAWING : ===--- */
 
 // --- Clearing the console :
 DRB_FFI
 void clear_console(void) {
-  for(size_t y = 0; y < console->height; y+=1) {
-    for(size_t x = 0; x < console->width; x+=1) {
-      Uint32 x_offset = x * console->graphic_context.font->width;
-      Uint32 y_offset = y * console->graphic_context.font->height;
+  // Saving the current drawing glyph... :
+  Uint8   previous_index              = console->graphic_context.index;
+  Uint32  previous_foreground         = console->graphic_context.foreground;
+  Uint32  previous_background         = console->graphic_context.background;
 
-      for(size_t i = 0; i < console->graphic_context.font->height; i+=1 ) {
-        Uint8 index = console->graphic_context.clear_index;
-        Uint8 line  = *(console->graphic_context.font->glyph_data + FONTS_MAX_WIDTH * sizeof(Uint8) * index + i);
+  // And setting the clear glyph as the current drawing glyph :
+  console->graphic_context.index      = console->graphic_context.clear_index;
+  console->graphic_context.foreground = console->graphic_context.clear_foreground;
+  console->graphic_context.background = console->graphic_context.clear_background;
 
-        for(size_t j = 0; j < console->graphic_context.font->height; j+=1) {
-          Uint32 pixel_index            = ( y_offset + i ) * console->pixel_width + x_offset + j;
-          console->pixels[pixel_index]  = ((line >> j) & 1 ) == true ? console->graphic_context.clear_foreground : console->graphic_context.clear_background;
-        }
-      }
-    }
-  }
+  // Drawing the clear glyph all over the console :
+  for(size_t y = 0; y < console->height; y+=1)
+    for(size_t x = 0; x < console->width; x+=1)
+      draw_glyph_at(x, y);
+
+  // Restoring the drawing glyph :
+  console->graphic_context.index      = previous_index;
+  console->graphic_context.foreground = previous_foreground;
+  console->graphic_context.background = previous_background;
 }
 
 
@@ -309,23 +332,24 @@ void clear_console(void) {
 DRB_FFI
 void draw_glyph_at(Uint32 x,Uint32 y) {
   // --- What glyph are we talking about ?
-  Uint32 glyph_offset = y * console->width + x;
+  Uint32  glyph_offset  = y * console->width + x;
 
   // --- Updating the glyphs :
   if (console->graphic_context.should_draw_index)
     console->glyphs[glyph_offset].index       = console->graphic_context.index;
-  if (console->graphic_context.should_draw_background)
-    console->glyphs[glyph_offset].background  = console->graphic_context.background;
   if (console->graphic_context.should_draw_foreground)
     console->glyphs[glyph_offset].foreground  = console->graphic_context.foreground;
+  if (console->graphic_context.should_draw_background)
+    console->glyphs[glyph_offset].background  = console->graphic_context.background;
+
+  Uint8 index = console->glyphs[glyph_offset].index;
 
   // --- Drawing the pixels :
   Uint32 x_offset = x * console->graphic_context.font->width;
   Uint32 y_offset = y * console->graphic_context.font->height;
 
   for(size_t i = 0; i < console->graphic_context.font->height; i+=1 ) {
-    Uint8 index = console->glyphs[glyph_offset].index;
-    Uint8 line  = *(console->graphic_context.font->glyph_data + FONTS_MAX_WIDTH * sizeof(Uint8) * index + i);
+    Uint8 line  = *(console->graphic_context.font->glyph_data + sizeof(Uint8) * (index * console->graphic_context.font->height + i));
     for(size_t j = 0; j < console->graphic_context.font->width; j+=1) {
       Uint32 pixel_index            = ( y_offset + i ) * console->pixel_width + x_offset + j;
       console->pixels[pixel_index]  = ((line >> j) & 1 ) == true ? console->glyphs[glyph_offset].foreground : console->glyphs[glyph_offset].background;

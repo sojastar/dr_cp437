@@ -43,7 +43,13 @@ module CP437
       FFI::CP437Console.set_gc_index index
     end
 
-    def clear_console
+    def set_font(font_name)
+      FFI::CP437Console.set_gc_font font_name
+      @pixel_width  = FFI::CP437Console.get_console_pixel_width
+      @pixel_height = FFI::CP437Console.get_console_pixel_height
+    end
+
+    def clear
       FFI::CP437Console.clear_console()
     end
 

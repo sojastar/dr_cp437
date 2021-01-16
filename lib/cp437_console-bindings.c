@@ -196,6 +196,15 @@ static mrb_value drb_ffi_delete_console_Binding(mrb_state *state, mrb_value valu
     delete_console();
     return mrb_nil_value();
 }
+static mrb_value drb_ffi_resize_console_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 width_0 = drb_ffi__ZTSj_FromRuby(state, args[0]);
+    Uint32 height_1 = drb_ffi__ZTSj_FromRuby(state, args[1]);
+    resize_console(width_0, height_1);
+    return mrb_nil_value();
+}
 static mrb_value drb_ffi_update_console_Binding(mrb_state *state, mrb_value value) {
     update_console();
     return mrb_nil_value();
@@ -271,6 +280,14 @@ static mrb_value drb_ffi_set_gc_clear_index_Binding(mrb_state *state, mrb_value 
     mrb_get_args_f(state, "*", &args, &argc);
     Uint8 index_0 = drb_ffi__ZTSh_FromRuby(state, args[0]);
     set_gc_clear_index(index_0);
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi_set_gc_font_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    char *font_name_0 = drb_ffi__ZTSPc_FromRuby(state, args[0]);
+    set_gc_font(font_name_0);
     return mrb_nil_value();
 }
 static mrb_value drb_ffi_clear_console_Binding(mrb_state *state, mrb_value value) {
@@ -392,6 +409,7 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     struct RClass *object_class = state->object_class;
     mrb_define_module_function_f(state, module, "init_console", drb_ffi_init_console_Binding, MRB_ARGS_REQ(4));
     mrb_define_module_function_f(state, module, "delete_console", drb_ffi_delete_console_Binding, MRB_ARGS_REQ(0));
+    mrb_define_module_function_f(state, module, "resize_console", drb_ffi_resize_console_Binding, MRB_ARGS_REQ(2));
     mrb_define_module_function_f(state, module, "update_console", drb_ffi_update_console_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_console_width", drb_ffi_get_console_width_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_console_height", drb_ffi_get_console_height_Binding, MRB_ARGS_REQ(0));
@@ -404,6 +422,7 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_module_function_f(state, module, "set_gc_clear_background", drb_ffi_set_gc_clear_background_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_clear_foreground", drb_ffi_set_gc_clear_foreground_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_clear_index", drb_ffi_set_gc_clear_index_Binding, MRB_ARGS_REQ(1));
+    mrb_define_module_function_f(state, module, "set_gc_font", drb_ffi_set_gc_font_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "clear_console", drb_ffi_clear_console_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "draw_glyph_at", drb_ffi_draw_glyph_at_Binding, MRB_ARGS_REQ(2));
     mrb_define_module_function_f(state, module, "draw_horizontal_line", drb_ffi_draw_horizontal_line_Binding, MRB_ARGS_REQ(3));
