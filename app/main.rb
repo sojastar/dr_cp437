@@ -15,7 +15,7 @@ def setup(args)
   args.state.font_index = 0
 
   args.state.console    = CP437::Console.new  0, 0,
-                                              1,
+                                              2,
                                               CONSOLE_WIDTH,
                                               CONSOLE_HEIGHT,
                                               FONT_LIST[args.state.font_index],
