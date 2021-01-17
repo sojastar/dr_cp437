@@ -659,281 +659,79 @@ void scan_polygon_right_edge(float x1, float y1, float x2, float y2) {
 }
 
 
-/*void FillPolygon_GFXONLY ( Vector2[] vertices ) {
-  int  i, j, windingOrder, tileIndex, tileIndexY;
-  int  maxY, minY, maxYIndex, minYIndex;
-  int  previousPointX, nextPointX;
+void fill_polygon(Uint32* vertices[2],size_t vertices_count) {
+  size_t i;
 
   // Clearing the rasterizer's buffers :
-  for(size_t i = 0; i < height; i += 1) {
-    leftScan[i]   = int.MaxValue;
-    rightScan[i]  = 0;
+  for(i = 0; i < console->height; i += 1) {
+    console->left_scan[i]   = UINT8_MAX;
+    console->right_scan[i]  = 0;
   }
 
 
   // Finding the top and bottom of the polygon :
 
   // Initializing the loop with the first point y value :
-  max_y_index = 0;
-  min_y_index = 0;
+  Uint32 max_y_index = 0;
+  Uint32 min_y_index = 0;
 
-  maxY = (int)vertices[maxYIndex].y;
-  minY = (int)vertices[minYIndex].y;
+  Uint32 max_y  = vertices[max_y_index][1];
+  Uint32 min_y  = vertices[min_y_index][1];
 
-  for ( i = 1; i < vertices.Length; i++ ) {
+  for(i = 1; i < vertices_count; i += 1) {
 
     // Check the bottom :
-    if ( (int)vertices[i].y < minY ) {
-      minY    = (int)vertices[i].y;
-      minYIndex  = i;
+    if ( vertices[i][1] < min_y ) {
+      min_y       = vertices[i][1];
+      min_y_index = i;
     }
 
     // Check the top :
-    if ( (int)vertices[i].y > maxY ) {
-      maxY    = (int)vertices[i].y;
-      maxYIndex  = i;
+    if ( vertices[i][1] > max_y ) {
+      max_y       = vertices[i][1];
+      max_y_index = i;
     }
 
   }
 
 
   // Discard null height polygons :
-  if ( minY == maxY )
+  if ( min_y == max_y )
     return;
 
 
   // Devise the winding order :
-  previousPointX  = (int)vertices[( maxYIndex - 1 + vertices.Length) % vertices.Length].x;
-  nextPointX      = (int)vertices[( maxYIndex + 1 ) % vertices.Length].x;
-  windingOrder    = previousPointX < nextPointX ? -1 : 1;
+  Uint32  previous_point_x  = vertices[( max_y_index - 1 + vertices_count) % vertices_count][0];
+  Uint32  next_point_x      = vertices[( max_y_index + 1 ) % vertices_count][0];
+  int     winding_order     = previous_point_x < next_point_x ? -1 : 1;
 
 
   // Scan the left and right edges of the polygon :
 
   // Left :
   i = 0;
-  while ( (int)vertices[( ( maxYIndex + i * windingOrder ) + vertices.Length ) % vertices.Length].y != minY ) {
-
-    ScanPolygonLeftEdge(  vertices[( ( maxYIndex + i * windingOrder ) + vertices.Length ) % vertices.Length].x,
-        vertices[( ( maxYIndex + i * windingOrder ) + vertices.Length ) % vertices.Length].y,
-        vertices[( ( maxYIndex + ( i + 1 ) * windingOrder ) + vertices.Length ) % vertices.Length].x,
-        vertices[( ( maxYIndex + ( i + 1 ) * windingOrder ) + vertices.Length ) % vertices.Length].y );
+  while ( vertices[( ( max_y_index + i * winding_order ) + vertices_count ) % vertices_count][1] != min_y ) {
+    scan_polygon_left_edge( vertices[( ( max_y_index + i * winding_order ) + vertices_count ) % vertices_count][0],
+                            vertices[( ( max_y_index + i * winding_order ) + vertices_count ) % vertices_count][1],
+                            vertices[( ( max_y_index + ( i + 1 ) * winding_order ) + vertices_count ) % vertices_count][0],
+                            vertices[( ( max_y_index + ( i + 1 ) * winding_order ) + vertices_count ) % vertices_count][1] );
 
     i += 1;
-
   }
 
   // Right :
   i = 0;
-  while ( (int)vertices[( ( maxYIndex - i * windingOrder ) + vertices.Length ) % vertices.Length].y != minY ) {
-
-    ScanPolygonRightEdge(  vertices[( ( maxYIndex - i * windingOrder ) + vertices.Length ) % vertices.Length].x,
-        vertices[( ( maxYIndex - i * windingOrder ) + vertices.Length ) % vertices.Length].y,
-        vertices[( ( maxYIndex - ( i + 1 ) * windingOrder ) + vertices.Length ) % vertices.Length].x,
-        vertices[( ( maxYIndex - ( i + 1 ) * windingOrder ) + vertices.Length ) % vertices.Length].y );
+  while ( vertices[( ( max_y_index - i * winding_order ) + vertices_count ) % vertices_count][1] != min_y ) {
+    scan_polygon_right_edge(  vertices[( ( max_y_index - i * winding_order ) + vertices_count ) % vertices_count][0],
+                              vertices[( ( max_y_index - i * winding_order ) + vertices_count ) % vertices_count][1],
+                              vertices[( ( max_y_index - ( i + 1 ) * winding_order ) + vertices_count ) % vertices_count][0],
+                              vertices[( ( max_y_index - ( i + 1 ) * winding_order ) + vertices_count ) % vertices_count][1] );
 
     i += 1;
-
   }
 
 
   // Draw the polygon :
-  if ( drawGlyph == true ) {
-    for (i = minY; i <= maxY; i++ ) {
-
-      tileIndexY = i * width;
-
-      for ( j = leftScan[i]; j <= rightScan[i]; j++ ) {
-
-        tileIndex = bottomMaxSpriteGlyphs + j + tileIndexY;
-
-        fontUV[4 * tileIndex]    = new Vector2 ( currentGlyphTexX, currentGlyphTexY - glyphVTexOffsetForWindows );
-        fontUV[4 * tileIndex + 1]  = new Vector2 (    nextGlyphTexX, currentGlyphTexY - glyphVTexOffsetForWindows );
-        fontUV[4 * tileIndex + 2]  = new Vector2 (    nextGlyphTexX,    nextGlyphTexY - glyphVTexOffsetForWindows );
-        fontUV[4 * tileIndex + 3]  = new Vector2 ( currentGlyphTexX,    nextGlyphTexY - glyphVTexOffsetForWindows );
-
-        tiles[tileIndex - bottomMaxSpriteGlyphs].glyph = currentGlyph;
-
-      }
-    }
-  }
-
-
-  if ( drawGlyphColor == true ) {
-    for ( i = minY; i <= maxY; i++ ) {
-      tileIndexY = i * width;
-      for (j = leftScan[i]; j <= rightScan[i]; j++ ) {
-        foreground.SetPixel (  (int)colorsTexCoords[CONSOLE_COORDS].x + j,
-            (int)colorsTexCoords[CONSOLE_COORDS].y + i,
-            currentGlyphColor  );
-        tiles[tileIndexY + j].front = currentGlyphColor;
-      }
-    }
-  }
-
-
-  if ( drawBackgroundColor == true ) {
-    for ( i = minY; i <= maxY; i++ ) {
-      tileIndexY = i * width;
-      for (j = leftScan[i]; j <= rightScan[i]; j++ ) {
-        background.SetPixel (  (int)colorsTexCoords[CONSOLE_COORDS].x + j,
-            (int)colorsTexCoords[CONSOLE_COORDS].y + i,
-            currentBackgroundColor  );
-        tiles[tileIndexY + j].back = currentBackgroundColor;
-      }
-    }
-  }
-
+  for(i = min_y; i <= max_y; i += 1)
+    draw_horizontal_line(console->left_scan[i], console->right_scan[i], i);
 }
-
-public void _FillPolygon_ALL ( Vector2[] vertices ) {
-
-  int  i, j, windingOrder, tileIndex, tileIndexY;
-  int  maxY, minY, maxYIndex, minYIndex;
-  int  previousPointX, nextPointX;
-
-  // Clearing the rasterizer's buffers :
-  for ( i = 0; i < height; i++ ) {
-    leftScan[i]    = int.MaxValue;
-    rightScan[i]  = 0;
-  }
-
-
-  // Finding the top and bottom of the polygon :
-
-  // Initializing the loop with the first point y value :
-  maxYIndex   = 0;
-  minYIndex   = 0;
-
-  maxY = (int)vertices[maxYIndex].y;
-  minY = (int)vertices[minYIndex].y;
-
-  for ( i = 1; i < vertices.Length; i++ ) {
-
-    // Check the bottom :
-    if ( (int)vertices[i].y < minY ) {
-      minY    = (int)vertices[i].y;
-      minYIndex  = i;
-    }
-
-    // Check the top :
-    if ( (int)vertices[i].y > maxY ) {
-      maxY    = (int)vertices[i].y;
-      maxYIndex  = i;
-    }
-
-  }
-
-
-  // Discard null height polygons :
-  if ( minY == maxY )
-    return;
-
-
-  // Devise the winding order :
-  previousPointX  = (int)vertices[( maxYIndex - 1 + vertices.Length) % vertices.Length].x;
-  nextPointX      = (int)vertices[( maxYIndex + 1 ) % vertices.Length].x;
-  windingOrder    = previousPointX < nextPointX ? -1 : 1;
-
-
-  // Scan the left and right edges of the polygon :
-
-  // Left :
-  i = 0;
-  while ( (int)vertices[( ( maxYIndex + i * windingOrder ) + vertices.Length ) % vertices.Length].y != minY ) {
-
-    ScanPolygonLeftEdge(  vertices[( ( maxYIndex + i * windingOrder ) + vertices.Length ) % vertices.Length].x,
-        vertices[( ( maxYIndex + i * windingOrder ) + vertices.Length ) % vertices.Length].y,
-        vertices[( ( maxYIndex + ( i + 1 ) * windingOrder ) + vertices.Length ) % vertices.Length].x,
-        vertices[( ( maxYIndex + ( i + 1 ) * windingOrder ) + vertices.Length ) % vertices.Length].y );
-
-    i += 1;
-
-  }
-
-  // Right :
-  i = 0;
-  while ( (int)vertices[( ( maxYIndex - i * windingOrder ) + vertices.Length ) % vertices.Length].y != minY ) {
-
-    ScanPolygonRightEdge(  vertices[( ( maxYIndex - i * windingOrder ) + vertices.Length ) % vertices.Length].x,
-        vertices[( ( maxYIndex - i * windingOrder ) + vertices.Length ) % vertices.Length].y,
-        vertices[( ( maxYIndex - ( i + 1 ) * windingOrder ) + vertices.Length ) % vertices.Length].x,
-        vertices[( ( maxYIndex - ( i + 1 ) * windingOrder ) + vertices.Length ) % vertices.Length].y );
-
-    i += 1;
-
-  }
-
-
-  // Draw the polygon :
-  if ( drawGlyph == true ) {
-    for (i = minY; i <= maxY; i++ ) {
-
-      tileIndexY = i * width;
-
-      for ( j = leftScan[i]; j <= rightScan[i]; j++ ) {
-
-        tileIndex = bottomMaxSpriteGlyphs + j + tileIndexY;
-
-        fontUV[4 * tileIndex]    = new Vector2 ( currentGlyphTexX, currentGlyphTexY - glyphVTexOffsetForWindows );
-        fontUV[4 * tileIndex + 1]  = new Vector2 (    nextGlyphTexX, currentGlyphTexY - glyphVTexOffsetForWindows );
-        fontUV[4 * tileIndex + 2]  = new Vector2 (    nextGlyphTexX,    nextGlyphTexY - glyphVTexOffsetForWindows );
-        fontUV[4 * tileIndex + 3]  = new Vector2 ( currentGlyphTexX,    nextGlyphTexY - glyphVTexOffsetForWindows );
-
-        tiles[tileIndex - bottomMaxSpriteGlyphs].glyph = currentGlyph;
-
-      }
-    }
-  }
-
-
-  if ( drawGlyphColor == true ) {
-    for ( i = minY; i <= maxY; i++ ) {
-      tileIndexY = i * width;
-      for (j = leftScan[i]; j <= rightScan[i]; j++ ) {
-        foreground.SetPixel (  (int)colorsTexCoords[CONSOLE_COORDS].x + j,
-            (int)colorsTexCoords[CONSOLE_COORDS].y + i,
-            currentGlyphColor  );
-        tiles[tileIndexY + j].front = currentGlyphColor;
-      }
-    }
-  }
-
-
-  if ( drawBackgroundColor == true ) {
-    for ( i = minY; i <= maxY; i++ ) {
-      tileIndexY = i * width;
-      for (j = leftScan[i]; j <= rightScan[i]; j++ ) {
-        background.SetPixel (  (int)colorsTexCoords[CONSOLE_COORDS].x + j,
-            (int)colorsTexCoords[CONSOLE_COORDS].y + i,
-            currentBackgroundColor  );
-        tiles[tileIndexY + j].back = currentBackgroundColor;
-      }
-    }
-  }
-
-  if ( setType == true ) {
-    for ( i = minY; i <= maxY; i++ ) {
-      tileIndexY = i * width;
-      for (j = leftScan[i]; j <= rightScan[i]; j++ )
-        tiles[tileIndexY + j].type = currentType;
-    }
-  }
-
-  if ( setParam == true ) {
-    for ( i = minY; i <= maxY; i++ ) {
-      tileIndexY = i * width;
-      for (j = leftScan[i]; j <= rightScan[i]; j++ )
-        CopyParams ( currentParam, tiles[tileIndexY + j].param );
-    }
-  }
-
-  if ( setDestructability == true ) {
-    for ( i = minY; i <= maxY; i++ ) {
-      tileIndexY = i * width;
-      for (j = leftScan[i]; j <= rightScan[i]; j++ )
-        tiles[tileIndexY + j].destructible = currentDestructability;
-    }
-  }
-
-}*/

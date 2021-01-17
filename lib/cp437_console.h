@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "cp437_8x8.h"
 #include "cp437_8x14.h"
 #include "cp437_8x16.h"
@@ -153,6 +154,9 @@ void fill_rectangle(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
 void draw_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
 void draw_thin_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
 void draw_thick_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
+
+// --- Convex Polygons :
+void fill_polygon(Uint32* vertices[2],size_t vertices_count);
 
 
 
