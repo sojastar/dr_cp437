@@ -141,6 +141,10 @@ module CP437
     def draw_thick_window(x,y,width,height)
       FFI::CP437Console.draw_thick_window x, y, width, height
     end
+
+    def fill_polygon(vertices)
+      FFI::CP437Console.fill_polygon(vertices)
+    end
   end
 
   module Glyph

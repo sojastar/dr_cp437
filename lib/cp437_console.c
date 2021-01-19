@@ -659,8 +659,11 @@ void scan_polygon_right_edge(float x1, float y1, float x2, float y2) {
 }
 
 
-void fill_polygon(Uint32* vertices[2],size_t vertices_count) {
+DRB_FFI
+void fill_polygon(Vertices vertices) {
   size_t i;
+
+  printf("vertices count: %zu\n", vertices.count);
 
   // Clearing the rasterizer's buffers :
   for(i = 0; i < console->height; i += 1) {
@@ -675,20 +678,21 @@ void fill_polygon(Uint32* vertices[2],size_t vertices_count) {
   Uint32 max_y_index = 0;
   Uint32 min_y_index = 0;
 
-  Uint32 max_y  = vertices[max_y_index][1];
-  Uint32 min_y  = vertices[min_y_index][1];
+  printf("first y coord: %zu\n", vertices.y[0]);
+  //Uint32 max_y  = vertices.y[max_y_index];
+  //Uint32 min_y  = vertices.y[min_y_index];
 
-  for(i = 1; i < vertices_count; i += 1) {
+  /*for(i = 1; i < vertices.count; i += 1) {
 
     // Check the bottom :
-    if ( vertices[i][1] < min_y ) {
-      min_y       = vertices[i][1];
+    if ( vertices.y[i] < min_y ) {
+      min_y       = vertices.y[i];
       min_y_index = i;
     }
 
     // Check the top :
-    if ( vertices[i][1] > max_y ) {
-      max_y       = vertices[i][1];
+    if ( vertices.y[i] > max_y ) {
+      max_y       = vertices.y[i];
       max_y_index = i;
     }
 
@@ -701,15 +705,15 @@ void fill_polygon(Uint32* vertices[2],size_t vertices_count) {
 
 
   // Devise the winding order :
-  Uint32  previous_point_x  = vertices[( max_y_index - 1 + vertices_count) % vertices_count][0];
-  Uint32  next_point_x      = vertices[( max_y_index + 1 ) % vertices_count][0];
+  Uint32  previous_point_x  = vertices.x[( max_y_index - 1 + vertices.count) % vertices.count];
+  Uint32  next_point_x      = vertices.x[( max_y_index + 1 ) % vertices.count];
   int     winding_order     = previous_point_x < next_point_x ? -1 : 1;
 
-
+  printf("winding order: %d", winding_order);*/
   // Scan the left and right edges of the polygon :
 
   // Left :
-  i = 0;
+  /*i = 0;
   while ( vertices[( ( max_y_index + i * winding_order ) + vertices_count ) % vertices_count][1] != min_y ) {
     scan_polygon_left_edge( vertices[( ( max_y_index + i * winding_order ) + vertices_count ) % vertices_count][0],
                             vertices[( ( max_y_index + i * winding_order ) + vertices_count ) % vertices_count][1],
@@ -733,5 +737,5 @@ void fill_polygon(Uint32* vertices[2],size_t vertices_count) {
 
   // Draw the polygon :
   for(i = min_y; i <= max_y; i += 1)
-    draw_horizontal_line(console->left_scan[i], console->right_scan[i], i);
+    draw_horizontal_line(console->left_scan[i], console->right_scan[i], i);*/
 }

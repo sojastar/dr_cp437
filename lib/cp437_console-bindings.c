@@ -110,6 +110,24 @@ static Uint8 drb_ffi__ZTSh_FromRuby(mrb_state *state, mrb_value self) {
 static mrb_value drb_ffi__ZTSh_ToRuby(mrb_state *state, Uint8 value) {
     return mrb_fixnum_value(value);
 }
+struct drb_foreign_object_ZTS8Vertices {
+    drb_foreign_object_kind kind;
+    Vertices value;
+};
+static mrb_data_type ForeignObjectType_ZTS8Vertices = {"Vertices", drb_free_foreign_object_indirect};
+static Vertices drb_ffi__ZTS8Vertices_FromRuby(mrb_state *state, mrb_value self) {
+    return ((struct drb_foreign_object_ZTS8Vertices *)DATA_PTR(self))->value;
+}
+static mrb_value drb_ffi__ZTS8Vertices_ToRuby(mrb_state *state, Vertices value) {
+    struct drb_foreign_object_ZTS8Vertices *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTS8Vertices));
+    ptr->value = value;
+    ptr->kind = drb_foreign_object_kind_struct;
+    struct RClass *FFI = mrb_module_get_f(state, "FFI");
+    struct RClass *module = mrb_module_get_under_f(state, FFI, "CP437Console");
+    struct RClass *klass = mrb_class_get_under_f(state, module, "Vertices");
+    struct RData *rdata = mrb_data_object_alloc_f(state, klass, ptr, &ForeignObjectType_ZTS8Vertices);
+    return mrb_obj_value(rdata);
+}
 static char drb_ffi__ZTSc_FromRuby(mrb_state *state, mrb_value self) {
     return mrb_fixnum(self);
 }
@@ -138,6 +156,16 @@ static mrb_value drb_ffi__ZTSPh_ToRuby(mrb_state *state, Uint8 *value) {
     struct RClass *klass = mrb_class_get_under_f(state, module, "Unsigned_charPointer");
     struct RData *rdata = mrb_data_object_alloc_f(state, klass, ptr, &ForeignObjectType_ZTSPh);
     return mrb_obj_value(rdata);
+}
+static Uint32 drb_ffi__ZTSA_j_FromRuby(mrb_state *state, mrb_value self)[] {
+}
+static mrb_value drb_ffi__ZTSA_j_ToRuby(mrb_state *state, Uint32 value[]) {
+}
+static size_t drb_ffi__ZTSm_FromRuby(mrb_state *state, mrb_value self) {
+    return mrb_fixnum(self);
+}
+static mrb_value drb_ffi__ZTSm_ToRuby(mrb_state *state, size_t value) {
+    return mrb_fixnum_value(value);
 }
 static mrb_value drb_ffi__ZTSPc_New(mrb_state *mrb, mrb_value self) {
     struct drb_foreign_object_ZTSPc *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTSPc));
@@ -315,6 +343,50 @@ static mrb_value drb_ffi__ZTS4Font_glyph_data_Set(mrb_state *state, mrb_value se
     mrb_get_args_f(state, "*", &args, &argc);
     Uint8 *new_value = drb_ffi__ZTSPh_FromRuby(state, args[0]);
     (&((struct drb_foreign_object_ZTS4Font *)DATA_PTR(self))->value)->glyph_data = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTS8Vertices_New(mrb_state *state, mrb_value self) {
+    struct drb_foreign_object_ZTS8Vertices *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTS8Vertices *));
+    struct RClass *FFI = mrb_module_get_f(state, "FFI");
+    struct RClass *module = mrb_module_get_under_f(state, FFI, "CP437Console");
+    struct RClass *klass = mrb_class_get_under_f(state, module, "Vertices");
+    struct RData *rdata = mrb_data_object_alloc_f(state, klass, ptr, &ForeignObjectType_ZTS8Vertices);
+    return mrb_obj_value(rdata);
+}
+static mrb_value drb_ffi__ZTS8Vertices_x_Get(mrb_state *state, mrb_value self) {
+    Vertices record = drb_ffi__ZTS8Vertices_FromRuby(state, self);
+    return drb_ffi__ZTSA_j_ToRuby(state, record.x);
+}
+static mrb_value drb_ffi__ZTS8Vertices_x_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 new_value[] = drb_ffi__ZTSA_j_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS8Vertices *)DATA_PTR(self))->value)->x = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTS8Vertices_y_Get(mrb_state *state, mrb_value self) {
+    Vertices record = drb_ffi__ZTS8Vertices_FromRuby(state, self);
+    return drb_ffi__ZTSA_j_ToRuby(state, record.y);
+}
+static mrb_value drb_ffi__ZTS8Vertices_y_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 new_value[] = drb_ffi__ZTSA_j_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS8Vertices *)DATA_PTR(self))->value)->y = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTS8Vertices_count_Get(mrb_state *state, mrb_value self) {
+    Vertices record = drb_ffi__ZTS8Vertices_FromRuby(state, self);
+    return drb_ffi__ZTSm_ToRuby(state, record.count);
+}
+static mrb_value drb_ffi__ZTS8Vertices_count_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    size_t new_value = drb_ffi__ZTSm_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS8Vertices *)DATA_PTR(self))->value)->count = new_value;
     return mrb_nil_value();
 }
 static mrb_value drb_ffi_init_console_Binding(mrb_state *state, mrb_value value) {
@@ -550,6 +622,14 @@ static mrb_value drb_ffi_draw_thick_window_Binding(mrb_state *state, mrb_value v
     draw_thick_window(x_0, y_1, width_2, height_3);
     return mrb_nil_value();
 }
+static mrb_value drb_ffi_fill_polygon_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Vertices vertices_0 = drb_ffi__ZTS8Vertices_FromRuby(state, args[0]);
+    fill_polygon(vertices_0);
+    return mrb_nil_value();
+}
 static int drb_ffi_init_indirect_functions(void *(*lookup)(const char *));
 DRB_FFI_EXPORT
 void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, struct RClass *FFI) {
@@ -586,6 +666,7 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_module_function_f(state, module, "draw_window", drb_ffi_draw_window_Binding, MRB_ARGS_REQ(4));
     mrb_define_module_function_f(state, module, "draw_thin_window", drb_ffi_draw_thin_window_Binding, MRB_ARGS_REQ(4));
     mrb_define_module_function_f(state, module, "draw_thick_window", drb_ffi_draw_thick_window_Binding, MRB_ARGS_REQ(4));
+    mrb_define_module_function_f(state, module, "fill_polygon", drb_ffi_fill_polygon_Binding, MRB_ARGS_REQ(1));
     struct RClass *CharPointerClass = mrb_define_class_under_f(state, module, "CharPointer", object_class);
     mrb_define_class_method_f(state, CharPointerClass, "new", drb_ffi__ZTSPc_New, MRB_ARGS_REQ(0));
     mrb_define_method_f(state, CharPointerClass, "value", drb_ffi__ZTSPc_GetValue, MRB_ARGS_REQ(0));
@@ -618,6 +699,14 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_method_f(state, FontClass, "height=", drb_ffi__ZTS4Font_height_Set, MRB_ARGS_REQ(1));
     mrb_define_method_f(state, FontClass, "glyph_data", drb_ffi__ZTS4Font_glyph_data_Get, MRB_ARGS_REQ(0));
     mrb_define_method_f(state, FontClass, "glyph_data=", drb_ffi__ZTS4Font_glyph_data_Set, MRB_ARGS_REQ(1));
+    struct RClass *VerticesClass = mrb_define_class_under_f(state, module, "Vertices", object_class);
+    mrb_define_class_method_f(state, VerticesClass, "new", drb_ffi__ZTS8Vertices_New, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, VerticesClass, "x", drb_ffi__ZTS8Vertices_x_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, VerticesClass, "x=", drb_ffi__ZTS8Vertices_x_Set, MRB_ARGS_REQ(1));
+    mrb_define_method_f(state, VerticesClass, "y", drb_ffi__ZTS8Vertices_y_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, VerticesClass, "y=", drb_ffi__ZTS8Vertices_y_Set, MRB_ARGS_REQ(1));
+    mrb_define_method_f(state, VerticesClass, "count", drb_ffi__ZTS8Vertices_count_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, VerticesClass, "count=", drb_ffi__ZTS8Vertices_count_Set, MRB_ARGS_REQ(1));
 }
 static int drb_ffi_init_indirect_functions(void *(*lookup)(const char *fnname)) {
   drb_symbol_lookup = lookup;

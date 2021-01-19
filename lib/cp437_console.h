@@ -38,7 +38,7 @@
 /******************************************************************************/
 
 /* ---=== FOR THE PIXEL ARRAY : ===--- */
-extern void *(*drb_symbol_lookup)(const char *sym);
+extern  void *(*drb_symbol_lookup)(const char *sym);
 typedef void (*drb_upload_pixel_array_fn)(const char *name,const int w,const int h,const Uint32 *pixels);
 
 /* ---=== CONSOLE RELATED : ===--- */
@@ -93,6 +93,12 @@ typedef struct Console {
   Uint32*                   right_scan;
   drb_upload_pixel_array_fn drb_upload_pixel_array;
 } Console;
+
+typedef struct Vertices {
+  Uint32[]  x;
+  Uint32[]  y;
+  size_t  count;
+} Vertices;
 
 
 
@@ -156,7 +162,7 @@ void draw_thin_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
 void draw_thick_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
 
 // --- Convex Polygons :
-void fill_polygon(Uint32* vertices[2],size_t vertices_count);
+void fill_polygon(Vertices vertices);
 
 
 

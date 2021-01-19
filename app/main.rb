@@ -38,6 +38,12 @@ def setup(args)
   #args.state.console.draw_window               1,  1, 12, 8
   #args.state.console.draw_thin_window         14,  1, 12, 8
   #args.state.console.draw_thick_window         1, 10, 12, 8
+  
+  puts args.state.console.font.width
+  puts args.state.console.font.height
+  puts args.state.console.font.name.str
+  puts args.state.console.font.name.value
+  puts args.state.console.font.name.methods(false)
 
   16.times do |i|
     16.times do |j|
@@ -46,10 +52,20 @@ def setup(args)
     end
   end
   
-  args.state.console.draw_string_at "bite au cul !?!", 20, 10
+  #args.state.console.draw_string_at "bite au cul !?!", 20, 10
+  
+  args.state.console.current_glyph_index  = 1
+  args.state.console.current_foreground   = [ 255, 0, 0, 255 ]
+  args.state.console.current_background   = [ 0, 255, 0, 255 ]
+  vertices    = FFI::CP437Console::Vertices.new
+  vertices.x  = [ 10, 15, 20 ]
+  vertices.y  = [ 10, 15, 10 ]
+  vertices.count  = 3
+  args.state.console.fill_polygon vertices
+  #args.state.console.fill_polygon [[10, 10], [15, 15], [20, 10]]
 
-  args.state.console.current_background = [ 0, 0, 0, 255 ]
-  args.state.console.current_foreground = [ 255, 255, 255, 255 ]
+  #args.state.console.current_background = [ 0, 0, 0, 255 ]
+  #args.state.console.current_foreground = [ 255, 255, 255, 255 ]
 
   args.state.setup_done = true
 end
