@@ -616,58 +616,152 @@ void set_polygon_vertex_count(size_t count) {
   console->vertex_count = count;
 }
 
-void scan_polygon_left_edge(float x1,float y1,float x2,float y2) {
-  int    y, y_top, y_bottom;
-  float  islope, x;
+void scan_polygon_left_edge(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
+  int x, y, dx, dy, x_increment, y_increment, d;
 
-  // Escape horizontal lines :
-  //if ( y1 == y2 )
-  if ( fabsf( y1 - y2 ) < 0.75 )
+  // Set-up of the bresenham algorythm :
+  x = x1;
+  y = y1;
+
+  dx = x2 - x1;
+  dy = y2 - y1;
+
+  x_increment = ( dx > 0 ) ? 1 : -1 ;
+  y_increment = ( dy > 0 ) ? 1 : -1 ;
+
+
+  // Edge cases :
+  if (dx == 0) {  // vertical line
+    for (size_t y = y1; y >= y2; y -= 1 )
+      console->left_scan[y] = x1;
     return;
-
-
-  // Calculating useful values for the scanning loop :
-  islope    = ( x2 - x1 ) / ( y2 - y1 );
-
-  y_top     = y1 > 0.5 ? (int)( y1 - 0.5 ) : 0;
-  y_bottom  = (int)( y2 + 0.5 );
-
-  x         = ( y_top + 0.5 - y1 ) * islope + x1;     // + 0.5 : the scan line goes through the middle of the pixel
-
-
-  // Scan converting :
-  for ( y = y_top; y >= y_bottom; y -= 1 ) {
-    console->left_scan[y] = (int)( x + 0.5 );
-    x -= islope;
   }
 
+  if (dy == 0) {  // horizontal line
+    console->left_scan[y1]  = x1 < x2 ? x1 : x2;
+    return;
+  }
+
+  dx = abs(dx);
+  dy = abs(dy);
+
+
+  // Drawing the line :
+
+  // First Point :
+  console->left_scan[y1]  = x1;
+
+  // Rest of the Line :
+  if (dx > dy) {
+
+    d = dx / 2;
+
+    for(size_t i = 1; i <= dx; i += 1) {
+      x += x_increment;
+      d += dy;
+
+      if (d >= dx) {
+        d -= dx;
+        y += y_increment;
+        console->left_scan[y] = x;
+      }
+      else {
+        if (y_increment < 0)
+          console->left_scan[y] = x;
+        else
+          console->left_scan[y+1] = x;
+      }
+    }
+  }
+  else {
+    d = dy / 2;
+
+    for(size_t i = 1; i <= dy; i += 1) {
+      y += y_increment;
+      d += dx;
+
+      if (d >= dy) {
+        d -= dy;
+        x += x_increment;
+      }
+
+      console->left_scan[y] = x;
+    }
+  }
 }
 
-void scan_polygon_right_edge(float x1, float y1, float x2, float y2) {
-  int    y, y_top, y_bottom;
-  float  islope, x;
+void scan_polygon_right_edge(Uint32 x1, Uint32 y1, Uint32 x2, Uint32 y2) {
+  int x, y, dx, dy, x_increment, y_increment, d;
 
-  // Escape horizontal lines :
-  //if ( y1 == y2 )
-  if ( fabsf( y1 - y2 ) < 0.75 )
+  // Set-up of the bresenham algorythm :
+  x = x1;
+  y = y1;
+
+  dx = x2 - x1;
+  dy = y2 - y1;
+
+  x_increment = ( dx > 0 ) ? 1 : -1 ;
+  y_increment = ( dy > 0 ) ? 1 : -1 ;
+
+
+  // Edge cases :
+  if (dx == 0) {  // vertical line
+    for (size_t y = y1; y >= y2; y -= 1 )
+      console->right_scan[y] = x1;
     return;
-
-
-  // Calculating useful values for the scanning loop :
-  islope    = ( x2 - x1 ) / ( y2 - y1 );
-
-  y_top     = y1 > 0.5 ? (int)( y1 - 0.5 ) : 0;
-  y_bottom  = (int)( y2 + 0.5 );
-
-  x         = ( y_top + 0.5 - y1 ) * islope + x1;     // + 0.5 : the scan line goes through the middle of the pixel
-
-
-  // Scan converting :
-  for ( y = y_top; y >= y_bottom; y -= 1) {
-    console->right_scan[y] = x > 0.5 ? (int)( x - 0.5 ) : 0;
-    x -= islope;
   }
 
+  if (dy == 0) {  // horizontal line
+    console->right_scan[y1]  = x1 > x2 ? x1 : x2;
+    return;
+  }
+
+  dx = abs(dx);
+  dy = abs(dy);
+
+
+  // Drawing the line :
+
+  // First Point :
+  console->right_scan[y1]  = x1;
+
+  // Rest of the Line :
+  if (dx > dy) {
+
+    d = dx / 2;
+
+    for(size_t i = 1; i <= dx; i += 1) {
+      x += x_increment;
+      d += dy;
+
+      if (d >= dx) {
+        d -= dx;
+        y += y_increment;
+        console->right_scan[y] = x;
+      }
+      else {
+        if (y_increment < 0)
+          console->right_scan[y] = x;
+        else
+          console->right_scan[y+1] = x;
+      }
+    }
+  }
+  else {
+    d = dy / 2;
+
+    for(size_t i = 1; i <= dy; i += 1) {
+      y += y_increment;
+      d += dx;
+
+      if (d >= dy) {
+        d -= dy;
+        x += x_increment;
+      }
+
+      console->right_scan[y] = x;
+    }
+  }
 }
 
 
@@ -718,11 +812,6 @@ void fill_polygon(void) {
   Uint32  next_point_x      = console->vertices[2*(( max_y_index + 1 ) % console->vertex_count)];
   int     winding_order     = previous_point_x < next_point_x ? -1 : 1;
 
-  /*printf("winding order: %d\n", winding_order);
-  printf("max_y_index: %u\n", max_y_index);
-  printf("min_y_index: %u\n", min_y_index);*/
-  // Scan the left and right edges of the polygon :
-
   // Left :
   i = 0;
   while ( console->vertices[2 * ( ( ( max_y_index + i * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1] != min_y ) {
@@ -747,6 +836,6 @@ void fill_polygon(void) {
 
 
   // Draw the polygon :
-  for(i = min_y; i < max_y; i += 1)
+  for(i = min_y; i <= max_y; i += 1)
     draw_horizontal_line(console->left_scan[i], console->right_scan[i], i);
 }

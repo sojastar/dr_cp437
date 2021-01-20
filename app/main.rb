@@ -57,7 +57,7 @@ def setup(args)
   args.state.console.current_glyph_index  = 1
   args.state.console.current_foreground   = [ 255, 0, 0, 255 ]
   args.state.console.current_background   = [ 0, 0, 255, 255 ]
-  vertices  = [ [10, 10], [12, 30], [50, 28], [49, 8] ]
+  vertices  = [ [10, 10], [12, 34], [50, 28], [45, 5] ]
   args.state.console.fill_polygon vertices
   #args.state.console.fill_polygon [[10, 10], [15, 15], [20, 10]]
 
