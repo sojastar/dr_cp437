@@ -4,8 +4,8 @@ RAND_SIZE       = 10000
 RAND            = RAND_SIZE.times.map { |i| rand }
 @rand_index     = rand RAND_SIZE
 
-CONSOLE_WIDTH   = 80#160
-CONSOLE_HEIGHT  = 45#90
+CONSOLE_WIDTH   = 160
+CONSOLE_HEIGHT  = 90
 
 FONT_LIST       = [ "cp437_8x8",
                     "cp437_8x14",
@@ -15,7 +15,7 @@ def setup(args)
   args.state.font_index = 0
 
   args.state.console    = CP437::Console.new  0, 0,
-                                              2,
+                                              1,
                                               CONSOLE_WIDTH,
                                               CONSOLE_HEIGHT,
                                               FONT_LIST[args.state.font_index],
@@ -56,11 +56,8 @@ def setup(args)
   
   args.state.console.current_glyph_index  = 1
   args.state.console.current_foreground   = [ 255, 0, 0, 255 ]
-  args.state.console.current_background   = [ 0, 255, 0, 255 ]
-  vertices    = FFI::CP437Console::Vertices.new
-  vertices.x  = [ 10, 15, 20 ]
-  vertices.y  = [ 10, 15, 10 ]
-  vertices.count  = 3
+  args.state.console.current_background   = [ 0, 0, 255, 255 ]
+  vertices  = [ [10, 10], [12, 30], [50, 28], [49, 8] ]
   args.state.console.fill_polygon vertices
   #args.state.console.fill_polygon [[10, 10], [15, 15], [20, 10]]
 

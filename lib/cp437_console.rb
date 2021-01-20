@@ -24,6 +24,8 @@ module CP437
 
       @pixel_width    = FFI::CP437Console.get_console_pixel_width
       @pixel_height   = FFI::CP437Console.get_console_pixel_height
+
+      @vertices       = FFI::CP437Console.get_polygon_vertices_array
     end
 
 
@@ -143,7 +145,12 @@ module CP437
     end
 
     def fill_polygon(vertices)
-      FFI::CP437Console.fill_polygon(vertices)
+      FFI::CP437Console.set_polygon_vertex_count vertices.length
+      vertices.length.times do |i|
+        @vertices[2*i]    = vertices[i][0]
+        @vertices[2*i+1]  = vertices[i][1]
+      end
+      FFI::CP437Console.fill_polygon
     end
   end
 

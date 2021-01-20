@@ -29,6 +29,8 @@
 #define THICK_WINDOW_TOP_BOTTOM_INDEX       205
 #define THICK_WINDOW_LEFT_RIGHT_INDEX       186
 
+#define MAX_VERTICES                        128
+
 
 
 
@@ -91,14 +93,11 @@ typedef struct Console {
   // Rendering :
   Uint32*                   left_scan;
   Uint32*                   right_scan;
+  Uint32*                   vertices;
+  size_t                    vertex_count;
+
   drb_upload_pixel_array_fn drb_upload_pixel_array;
 } Console;
-
-typedef struct Vertices {
-  Uint32[]  x;
-  Uint32[]  y;
-  size_t  count;
-} Vertices;
 
 
 
@@ -116,16 +115,16 @@ void delete_console(void);
 void update_console(void);
 
 // --- Geometry Management :
-int get_console_width(void);
-int get_console_height(void);
-int get_console_pixel_width(void);
-int get_console_pixel_height(void);
-void resize_console(Uint32 width,Uint32 height);
+int   get_console_width(void);
+int   get_console_height(void);
+int   get_console_pixel_width(void);
+int   get_console_pixel_height(void);
+void  resize_console(Uint32 width,Uint32 height);
 
 // --- Font Management :
 Font* get_font_by_name(char* font_name);
-Font get_current_font(void);
-void set_gc_font(char* const font_name);
+Font  get_current_font(void);
+void  set_gc_font(char* const font_name);
 
 // --- Graphic Context :
 void set_gc_index(Uint8 index);
@@ -141,7 +140,7 @@ void clear_console(void);
 
 // --- Single Glyphs :
 Glyph get_glyph_at(Uint32 x,Uint32 y);
-void draw_glyph_at(Uint32 x,Uint32 y);
+void  draw_glyph_at(Uint32 x,Uint32 y);
 
 // --- Strings :
 void draw_string_at(char* const string,Uint32 x,Uint32 y);
@@ -162,7 +161,9 @@ void draw_thin_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
 void draw_thick_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
 
 // --- Convex Polygons :
-void fill_polygon(Vertices vertices);
+Uint32* get_polygon_vertices_array(void);
+void    set_polygon_vertex_count(size_t count);
+void    fill_polygon(void);
 
 
 

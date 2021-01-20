@@ -59,8 +59,10 @@ void init_console(Uint32 width,Uint32 height,char* font_name, Glyph init_glyph) 
       draw_glyph_at(j, i);
 
   // --- Miscellaneous :
-  console->left_scan  = (Uint32*)malloc(height * sizeof(Uint32));
-  console->right_scan = (Uint32*)malloc(height * sizeof(Uint32));
+  console->left_scan    = (Uint32*)calloc(height, sizeof(Uint32));
+  console->right_scan   = (Uint32*)calloc(height, sizeof(Uint32));
+  console->vertices     = (Uint32*)calloc(2 * MAX_VERTICES, sizeof(Uint32));
+  console->vertex_count = 0;
 
   console->drb_upload_pixel_array = drb_symbol_lookup("drb_upload_pixel_array");
 }
@@ -604,6 +606,16 @@ void draw_thick_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
 
 
 // --- Polygons :
+DRB_FFI
+Uint32* get_polygon_vertices_array(void) {
+  return console->vertices;
+}
+
+DRB_FFI
+void set_polygon_vertex_count(size_t count) {
+  console->vertex_count = count;
+}
+
 void scan_polygon_left_edge(float x1,float y1,float x2,float y2) {
   int    y, y_top, y_bottom;
   float  islope, x;
@@ -660,10 +672,8 @@ void scan_polygon_right_edge(float x1, float y1, float x2, float y2) {
 
 
 DRB_FFI
-void fill_polygon(Vertices vertices) {
-  size_t i;
-
-  printf("vertices count: %zu\n", vertices.count);
+void fill_polygon(void) {
+  size_t  i;
 
   // Clearing the rasterizer's buffers :
   for(i = 0; i < console->height; i += 1) {
@@ -678,21 +688,20 @@ void fill_polygon(Vertices vertices) {
   Uint32 max_y_index = 0;
   Uint32 min_y_index = 0;
 
-  printf("first y coord: %zu\n", vertices.y[0]);
-  //Uint32 max_y  = vertices.y[max_y_index];
-  //Uint32 min_y  = vertices.y[min_y_index];
+  Uint32 max_y  = console->vertices[0];
+  Uint32 min_y  = console->vertices[1];
 
-  /*for(i = 1; i < vertices.count; i += 1) {
+  for(i = 1; i < console->vertex_count; i += 1) {
 
     // Check the bottom :
-    if ( vertices.y[i] < min_y ) {
-      min_y       = vertices.y[i];
+    if ( console->vertices[2*i+1] < min_y ) {
+      min_y       = console->vertices[2*i+1];
       min_y_index = i;
     }
 
     // Check the top :
-    if ( vertices.y[i] > max_y ) {
-      max_y       = vertices.y[i];
+    if ( console->vertices[2*i+1] > max_y ) {
+      max_y       = console->vertices[2*i+1];
       max_y_index = i;
     }
 
@@ -705,37 +714,39 @@ void fill_polygon(Vertices vertices) {
 
 
   // Devise the winding order :
-  Uint32  previous_point_x  = vertices.x[( max_y_index - 1 + vertices.count) % vertices.count];
-  Uint32  next_point_x      = vertices.x[( max_y_index + 1 ) % vertices.count];
+  Uint32  previous_point_x  = console->vertices[2*(( max_y_index - 1 + console->vertex_count) % console->vertex_count)];
+  Uint32  next_point_x      = console->vertices[2*(( max_y_index + 1 ) % console->vertex_count)];
   int     winding_order     = previous_point_x < next_point_x ? -1 : 1;
 
-  printf("winding order: %d", winding_order);*/
+  /*printf("winding order: %d\n", winding_order);
+  printf("max_y_index: %u\n", max_y_index);
+  printf("min_y_index: %u\n", min_y_index);*/
   // Scan the left and right edges of the polygon :
 
   // Left :
-  /*i = 0;
-  while ( vertices[( ( max_y_index + i * winding_order ) + vertices_count ) % vertices_count][1] != min_y ) {
-    scan_polygon_left_edge( vertices[( ( max_y_index + i * winding_order ) + vertices_count ) % vertices_count][0],
-                            vertices[( ( max_y_index + i * winding_order ) + vertices_count ) % vertices_count][1],
-                            vertices[( ( max_y_index + ( i + 1 ) * winding_order ) + vertices_count ) % vertices_count][0],
-                            vertices[( ( max_y_index + ( i + 1 ) * winding_order ) + vertices_count ) % vertices_count][1] );
+  i = 0;
+  while ( console->vertices[2 * ( ( ( max_y_index + i * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1] != min_y ) {
+    scan_polygon_left_edge( console->vertices[2 * ( ( ( max_y_index + i * winding_order ) + console->vertex_count ) % console->vertex_count ) ],
+                            console->vertices[2 * ( ( ( max_y_index + i * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1],
+                            console->vertices[2 * ( ( ( max_y_index + ( i + 1 ) * winding_order ) + console->vertex_count ) % console->vertex_count ) ],
+                            console->vertices[2 * ( ( ( max_y_index + ( i + 1 ) * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1] );
 
     i += 1;
   }
 
   // Right :
   i = 0;
-  while ( vertices[( ( max_y_index - i * winding_order ) + vertices_count ) % vertices_count][1] != min_y ) {
-    scan_polygon_right_edge(  vertices[( ( max_y_index - i * winding_order ) + vertices_count ) % vertices_count][0],
-                              vertices[( ( max_y_index - i * winding_order ) + vertices_count ) % vertices_count][1],
-                              vertices[( ( max_y_index - ( i + 1 ) * winding_order ) + vertices_count ) % vertices_count][0],
-                              vertices[( ( max_y_index - ( i + 1 ) * winding_order ) + vertices_count ) % vertices_count][1] );
+  while ( console->vertices[2 * ( ( ( max_y_index - i * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1] != min_y ) {
+    scan_polygon_right_edge(  console->vertices[2 * ( ( ( max_y_index - i * winding_order ) + console->vertex_count ) % console->vertex_count )],
+                              console->vertices[2 * ( ( ( max_y_index - i * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1],
+                              console->vertices[2 * ( ( ( max_y_index - ( i + 1 ) * winding_order ) + console->vertex_count ) % console->vertex_count ) ],
+                              console->vertices[2 * ( ( ( max_y_index - ( i + 1 ) * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1] );
 
     i += 1;
   }
 
 
   // Draw the polygon :
-  for(i = min_y; i <= max_y; i += 1)
-    draw_horizontal_line(console->left_scan[i], console->right_scan[i], i);*/
+  for(i = min_y; i < max_y; i += 1)
+    draw_horizontal_line(console->left_scan[i], console->right_scan[i], i);
 }
