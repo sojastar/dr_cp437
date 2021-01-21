@@ -64,6 +64,8 @@ module CP437
       FFI::CP437Console.set_gc_font font_name
       @pixel_width  = FFI::CP437Console.get_console_pixel_width
       @pixel_height = FFI::CP437Console.get_console_pixel_height
+      @font_width   = FFI::CP437Console.get_current_font.width
+      @font_height  = FFI::CP437Console.get_current_font.height
     end
 
 
