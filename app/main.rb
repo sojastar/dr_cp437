@@ -4,8 +4,8 @@ RAND_SIZE       = 10000
 RAND            = RAND_SIZE.times.map { |i| rand }
 @rand_index     = rand RAND_SIZE
 
-CONSOLE_WIDTH   = 160
-CONSOLE_HEIGHT  = 90
+CONSOLE_WIDTH   = 40#160
+CONSOLE_HEIGHT  = 22#90
 
 FONT_LIST       = [ "cp437_8x8",
                     "cp437_8x14",
@@ -14,8 +14,8 @@ FONT_LIST       = [ "cp437_8x8",
 def setup(args)
   args.state.font_index = 0
 
-  args.state.console    = CP437::Console.new  0, 0,
-                                              1,
+  args.state.console    = CP437::Console.new  50, 50,
+                                              3,
                                               CONSOLE_WIDTH,
                                               CONSOLE_HEIGHT,
                                               FONT_LIST[args.state.font_index],
@@ -54,7 +54,7 @@ def setup(args)
   args.state.console.current_foreground   = [ 255, 0, 0, 255 ]
   args.state.console.current_background   = [ 0, 0, 255, 255 ]
   vertices  = [ [10, 10], [12, 34], [50, 28], [45, 5] ]
-  args.state.console.fill_polygon vertices
+  #args.state.console.fill_polygon vertices
 
   args.state.console.draw_string_at "banane !?!", 20, 10
   args.state.setup_done = true
@@ -97,6 +97,8 @@ def tick(args)
   args.state.console.render(args)
 
   #args.outputs.primitives << args.gtk.current_framerate_primitives
+  mouse_x, mouse_y = args.state.console.mouse_coords(args)
+  args.outputs.labels << [ 20, 700, "mouse position: #{mouse_x},#{mouse_y}" ]
 end
 
 def randv

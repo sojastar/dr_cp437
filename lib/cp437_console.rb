@@ -5,7 +5,8 @@ module CP437
     attr_accessor :x, :y,
                   :scale
     attr_reader   :width, :height,
-                  :pixel_width, :pixel_height
+                  :pixel_width, :pixel_height,
+                  :font_width, :font_height
 
 
     # ---=== INITIALIZATION : ===---
@@ -24,6 +25,9 @@ module CP437
 
       @pixel_width    = FFI::CP437Console.get_console_pixel_width
       @pixel_height   = FFI::CP437Console.get_console_pixel_height
+
+      @font_width     = FFI::CP437Console.get_current_font.width
+      @font_height    = FFI::CP437Console.get_current_font.height
 
       @vertices       = FFI::CP437Console.get_polygon_vertices_array
     end
@@ -65,8 +69,8 @@ module CP437
 
     # ---=== MOUSE : ===---
     def mouse_coords(args)
-      [ ( args.inputs.mouse.point.x / 8 ).to_i,
-        ( ( 720 - args.inputs.mouse.point.y ) / 8 ).to_i ]
+      [ ( ( args.inputs.mouse.point.x - @x ) / ( @scale * @font_width ) ).to_i,
+        ( ( args.inputs.mouse.point.y - @y ) / ( @scale * @font_height ) ).to_i ]
     end
 
 
