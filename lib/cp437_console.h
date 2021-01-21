@@ -99,6 +99,12 @@ typedef struct Console {
   drb_upload_pixel_array_fn drb_upload_pixel_array;
 } Console;
 
+typedef struct Sprite {
+  Uint32  width;
+  Uint32  height;
+  Glyph*  glyphs;
+} Sprite;
+
 
 
 
@@ -164,6 +170,11 @@ void draw_thick_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
 Uint32* get_polygon_vertices_array(void);
 void    set_polygon_vertex_count(size_t count);
 void    fill_polygon(void);
+
+
+// --- Sprites :
+void  register_sprite(Uint32 width,Uint32 height,Glyph* glyphs);
+void  draw_sprite_at(Uint32 x,Uint32 y);
 
 
 
