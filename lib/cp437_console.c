@@ -229,7 +229,7 @@ void clear_console(void) {
 // --- Single Glyphs :
 DRB_FFI
 Glyph get_glyph_at(Uint32 x,Uint32 y) {
-  return console->glyphs[x + console->width * y];
+  return console->glyphs[x + console->width * ( console->height - y - 1)];
 }
 
 DRB_FFI

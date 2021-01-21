@@ -97,8 +97,9 @@ def tick(args)
   args.state.console.render(args)
 
   #args.outputs.primitives << args.gtk.current_framerate_primitives
-  mouse_x, mouse_y = args.state.console.mouse_coords(args)
-  args.outputs.labels << [ 20, 700, "mouse position: #{mouse_x},#{mouse_y}" ]
+  mouse_x, mouse_y  = args.state.console.mouse_coords(args)
+  glyph             = args.state.console.glyph_at(mouse_x, mouse_y).index
+  args.outputs.labels << [ 20, 700, "mouse position: #{mouse_x},#{mouse_y} with glyph: #{glyph}." ]
 end
 
 def randv
