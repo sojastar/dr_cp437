@@ -235,7 +235,7 @@ Glyph get_glyph_at(Uint32 x,Uint32 y) {
 DRB_FFI
 void draw_glyph_at(Uint32 x,Uint32 y) {
   // --- What glyph are we talking about ?
-  Uint32  glyph_offset  = y * console->width + x;
+  Uint32  glyph_offset  = ( console->height - y -1 ) * console->width + x;
 
   // --- Updating the glyphs :
   if (console->graphic_context.should_draw_index)
@@ -249,7 +249,7 @@ void draw_glyph_at(Uint32 x,Uint32 y) {
 
   // --- Drawing the pixels :
   Uint32 x_offset = x * console->graphic_context.font->width;
-  Uint32 y_offset = y * console->graphic_context.font->height;
+  Uint32 y_offset = ( console->height - y - 1 ) * console->graphic_context.font->height;
 
   for(size_t i = 0; i < console->graphic_context.font->height; i+=1 ) {
     Uint8 line  = *(console->graphic_context.font->glyph_data + sizeof(Uint8) * (index * console->graphic_context.font->height + i));
