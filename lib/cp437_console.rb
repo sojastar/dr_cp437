@@ -1,6 +1,38 @@
 $gtk.ffi_misc.gtk_dlopen("cp437_console")
 
 module CP437
+  module Glyph
+    def self.create(index,background,foreground)
+      glyph             = FFI::CP437Console::Glyph.new
+      glyph.index       = index 
+      glyph.background  = CP437::Color::pack_color *background
+      glyph.foreground  = CP437::Color::pack_color *foreground
+
+      glyph
+    end
+  end
+
+  module Color
+    def self.pack_color(red,green,blue,alpha)
+      (alpha<<24) | (blue<<16) | (green<<8) | red
+    end
+
+    def self.unpack_color(packed_color)
+      red   = packed_color & 0xff
+      green = ( packed_color & 0xff00 ) >> 8
+      blue  = ( packed_color & 0xff0000 ) >> 16
+      alpha = ( packed_color & 0xff000000) >> 24
+
+      [ red, green, blue, alpha ]
+    end
+
+    B = Color::pack_color   0,   0,   0, 255
+    W = Color::pack_color 255, 255, 255, 255
+    R = Color::pack_color 255,   0,   0, 255
+    G = Color::pack_color   0, 255,   0, 255
+    B = Color::pack_color   0,   0, 255, 255
+  end
+
   class Console
     attr_accessor :x, :y,
                   :scale
@@ -30,6 +62,8 @@ module CP437
       @font_height    = FFI::CP437Console.get_current_font.height
 
       @vertices       = FFI::CP437Console.get_polygon_vertices_array
+
+      @sprite_list    = {}
     end
 
 
@@ -158,31 +192,22 @@ module CP437
       end
       FFI::CP437Console.fill_polygon
     end
-  end
 
-  module Glyph
-    def self.create(index,background,foreground)
-      glyph             = FFI::CP437Console::Glyph.new
-      glyph.index       = index 
-      glyph.background  = CP437::Color::pack_color *background
-      glyph.foreground  = CP437::Color::pack_color *foreground
-
-      glyph
-    end
-  end
-
-  module Color
-    def self.pack_color(red,green,blue,alpha)
-      (alpha<<24) | (blue<<16) | (green<<8) | red
+    def draw_sprite_at(tag,x,y)
+      FFI::CP437Console::draw_sprite_at @sprites_list[tag][:index], x, y
     end
 
-    def self.unpack_color(packed_color)
-      red   = packed_color & 0xff
-      green = ( packed_color & 0xff00 ) >> 8
-      blue  = ( packed_color & 0xff0000 ) >> 16
-      alpha = ( packed_color & 0xff000000) >> 24
+    def register_sprite(tag,width,height,glyphs)
+      new_sprite          = FFI::CP437Console::create_sprite(width, height)
 
-      [ red, green, blue, alpha ]
+      (width * height).times do |i|
+        new_sprite.indices[i]     = glyphs[i][0]
+        new_sprite.foregrounds[i] = glyphs[i][1]
+        new_sprite.backgrounds[i] = glyphs[i][2]
+      end
+
+      @sprite_list[tag] = { index:  FFI::CP437Console::get_sprite_count,
+                            sprite: new_sprite }
     end
   end
 end

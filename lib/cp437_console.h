@@ -55,17 +55,17 @@ typedef struct Glyph {
 typedef struct GraphicContext {
   Font*   font;
 
-  Uint32  background;
-  Uint32  foreground;
   Uint8   index;
+  Uint32  foreground;
+  Uint32  background;
 
-  Uint32  clear_background;
-  Uint32  clear_foreground;
   Uint8   clear_index;
+  Uint32  clear_foreground;
+  Uint32  clear_background;
 
-  bool    should_draw_background;
-  bool    should_draw_foreground;
   bool    should_draw_index;
+  bool    should_draw_foreground;
+  bool    should_draw_background;
 
   Uint8   window_top_left_index;
   Uint8   window_top_right_index;
@@ -175,10 +175,11 @@ Uint32* get_polygon_vertices_array(void);
 void    set_polygon_vertex_count(size_t count);
 void    fill_polygon(void);
 
-
 // --- Sprites :
-void  register_sprite(Uint32 width,Uint32 height,Glyph* glyphs);
-void  draw_sprite_at(Uint32 x,Uint32 y);
+Sprite  create_sprite(Uint32 width,Uint32 height);
+void    free_sprite(Sprite* sprite);
+size_t  get_sprite_count(void);
+void    draw_sprite_at(size_t sprite_index,Uint32 x,Uint32 y);
 
 
 
@@ -195,3 +196,4 @@ Font*     fonts[]     = { &cp437_8x8,
 Console*  console;
 
 Sprite    sprites[MAX_SPRITES];
+size_t    sprite_count  = 0;

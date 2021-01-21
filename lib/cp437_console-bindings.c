@@ -137,6 +137,24 @@ static size_t drb_ffi__ZTSm_FromRuby(mrb_state *state, mrb_value self) {
 static mrb_value drb_ffi__ZTSm_ToRuby(mrb_state *state, size_t value) {
     return mrb_fixnum_value(value);
 }
+struct drb_foreign_object_ZTS6Sprite {
+    drb_foreign_object_kind kind;
+    Sprite value;
+};
+static mrb_data_type ForeignObjectType_ZTS6Sprite = {"Sprite", drb_free_foreign_object_indirect};
+static Sprite drb_ffi__ZTS6Sprite_FromRuby(mrb_state *state, mrb_value self) {
+    return ((struct drb_foreign_object_ZTS6Sprite *)DATA_PTR(self))->value;
+}
+static mrb_value drb_ffi__ZTS6Sprite_ToRuby(mrb_state *state, Sprite value) {
+    struct drb_foreign_object_ZTS6Sprite *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTS6Sprite));
+    ptr->value = value;
+    ptr->kind = drb_foreign_object_kind_struct;
+    struct RClass *FFI = mrb_module_get_f(state, "FFI");
+    struct RClass *module = mrb_module_get_under_f(state, FFI, "CP437Console");
+    struct RClass *klass = mrb_class_get_under_f(state, module, "Sprite");
+    struct RData *rdata = mrb_data_object_alloc_f(state, klass, ptr, &ForeignObjectType_ZTS6Sprite);
+    return mrb_obj_value(rdata);
+}
 static char drb_ffi__ZTSc_FromRuby(mrb_state *state, mrb_value self) {
     return mrb_fixnum(self);
 }
@@ -378,6 +396,74 @@ static mrb_value drb_ffi__ZTS4Font_glyph_data_Set(mrb_state *state, mrb_value se
     mrb_get_args_f(state, "*", &args, &argc);
     Uint8 *new_value = drb_ffi__ZTSPh_FromRuby(state, args[0]);
     (&((struct drb_foreign_object_ZTS4Font *)DATA_PTR(self))->value)->glyph_data = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTS6Sprite_New(mrb_state *state, mrb_value self) {
+    struct drb_foreign_object_ZTS6Sprite *ptr = calloc(1, sizeof(struct drb_foreign_object_ZTS6Sprite *));
+    struct RClass *FFI = mrb_module_get_f(state, "FFI");
+    struct RClass *module = mrb_module_get_under_f(state, FFI, "CP437Console");
+    struct RClass *klass = mrb_class_get_under_f(state, module, "Sprite");
+    struct RData *rdata = mrb_data_object_alloc_f(state, klass, ptr, &ForeignObjectType_ZTS6Sprite);
+    return mrb_obj_value(rdata);
+}
+static mrb_value drb_ffi__ZTS6Sprite_width_Get(mrb_state *state, mrb_value self) {
+    Sprite record = drb_ffi__ZTS6Sprite_FromRuby(state, self);
+    return drb_ffi__ZTSj_ToRuby(state, record.width);
+}
+static mrb_value drb_ffi__ZTS6Sprite_width_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 new_value = drb_ffi__ZTSj_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS6Sprite *)DATA_PTR(self))->value)->width = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTS6Sprite_height_Get(mrb_state *state, mrb_value self) {
+    Sprite record = drb_ffi__ZTS6Sprite_FromRuby(state, self);
+    return drb_ffi__ZTSj_ToRuby(state, record.height);
+}
+static mrb_value drb_ffi__ZTS6Sprite_height_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 new_value = drb_ffi__ZTSj_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS6Sprite *)DATA_PTR(self))->value)->height = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTS6Sprite_indices_Get(mrb_state *state, mrb_value self) {
+    Sprite record = drb_ffi__ZTS6Sprite_FromRuby(state, self);
+    return drb_ffi__ZTSPh_ToRuby(state, record.indices);
+}
+static mrb_value drb_ffi__ZTS6Sprite_indices_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint8 *new_value = drb_ffi__ZTSPh_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS6Sprite *)DATA_PTR(self))->value)->indices = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTS6Sprite_foregrounds_Get(mrb_state *state, mrb_value self) {
+    Sprite record = drb_ffi__ZTS6Sprite_FromRuby(state, self);
+    return drb_ffi__ZTSPj_ToRuby(state, record.foregrounds);
+}
+static mrb_value drb_ffi__ZTS6Sprite_foregrounds_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 *new_value = drb_ffi__ZTSPj_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS6Sprite *)DATA_PTR(self))->value)->foregrounds = new_value;
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi__ZTS6Sprite_backgrounds_Get(mrb_state *state, mrb_value self) {
+    Sprite record = drb_ffi__ZTS6Sprite_FromRuby(state, self);
+    return drb_ffi__ZTSPj_ToRuby(state, record.backgrounds);
+}
+static mrb_value drb_ffi__ZTS6Sprite_backgrounds_Set(mrb_state *state, mrb_value self) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 *new_value = drb_ffi__ZTSPj_FromRuby(state, args[0]);
+    (&((struct drb_foreign_object_ZTS6Sprite *)DATA_PTR(self))->value)->backgrounds = new_value;
     return mrb_nil_value();
 }
 static mrb_value drb_ffi_init_console_Binding(mrb_state *state, mrb_value value) {
@@ -629,6 +715,29 @@ static mrb_value drb_ffi_fill_polygon_Binding(mrb_state *state, mrb_value value)
     fill_polygon();
     return mrb_nil_value();
 }
+static mrb_value drb_ffi_create_sprite_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint32 width_0 = drb_ffi__ZTSj_FromRuby(state, args[0]);
+    Uint32 height_1 = drb_ffi__ZTSj_FromRuby(state, args[1]);
+    Sprite ret_val = create_sprite(width_0, height_1);
+    return drb_ffi__ZTS6Sprite_ToRuby(state, ret_val);
+}
+static mrb_value drb_ffi_get_sprite_count_Binding(mrb_state *state, mrb_value value) {
+    size_t ret_val = get_sprite_count();
+    return drb_ffi__ZTSm_ToRuby(state, ret_val);
+}
+static mrb_value drb_ffi_draw_sprite_at_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    size_t sprite_index_0 = drb_ffi__ZTSm_FromRuby(state, args[0]);
+    Uint32 x_1 = drb_ffi__ZTSj_FromRuby(state, args[1]);
+    Uint32 y_2 = drb_ffi__ZTSj_FromRuby(state, args[2]);
+    draw_sprite_at(sprite_index_0, x_1, y_2);
+    return mrb_nil_value();
+}
 static int drb_ffi_init_indirect_functions(void *(*lookup)(const char *));
 DRB_FFI_EXPORT
 void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, struct RClass *FFI) {
@@ -668,6 +777,9 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_module_function_f(state, module, "get_polygon_vertices_array", drb_ffi_get_polygon_vertices_array_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "set_polygon_vertex_count", drb_ffi_set_polygon_vertex_count_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "fill_polygon", drb_ffi_fill_polygon_Binding, MRB_ARGS_REQ(0));
+    mrb_define_module_function_f(state, module, "create_sprite", drb_ffi_create_sprite_Binding, MRB_ARGS_REQ(2));
+    mrb_define_module_function_f(state, module, "get_sprite_count", drb_ffi_get_sprite_count_Binding, MRB_ARGS_REQ(0));
+    mrb_define_module_function_f(state, module, "draw_sprite_at", drb_ffi_draw_sprite_at_Binding, MRB_ARGS_REQ(3));
     struct RClass *CharPointerClass = mrb_define_class_under_f(state, module, "CharPointer", object_class);
     mrb_define_class_method_f(state, CharPointerClass, "new", drb_ffi__ZTSPc_New, MRB_ARGS_REQ(0));
     mrb_define_method_f(state, CharPointerClass, "value", drb_ffi__ZTSPc_GetValue, MRB_ARGS_REQ(0));
@@ -706,6 +818,18 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_method_f(state, FontClass, "height=", drb_ffi__ZTS4Font_height_Set, MRB_ARGS_REQ(1));
     mrb_define_method_f(state, FontClass, "glyph_data", drb_ffi__ZTS4Font_glyph_data_Get, MRB_ARGS_REQ(0));
     mrb_define_method_f(state, FontClass, "glyph_data=", drb_ffi__ZTS4Font_glyph_data_Set, MRB_ARGS_REQ(1));
+    struct RClass *SpriteClass = mrb_define_class_under_f(state, module, "Sprite", object_class);
+    mrb_define_class_method_f(state, SpriteClass, "new", drb_ffi__ZTS6Sprite_New, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, SpriteClass, "width", drb_ffi__ZTS6Sprite_width_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, SpriteClass, "width=", drb_ffi__ZTS6Sprite_width_Set, MRB_ARGS_REQ(1));
+    mrb_define_method_f(state, SpriteClass, "height", drb_ffi__ZTS6Sprite_height_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, SpriteClass, "height=", drb_ffi__ZTS6Sprite_height_Set, MRB_ARGS_REQ(1));
+    mrb_define_method_f(state, SpriteClass, "indices", drb_ffi__ZTS6Sprite_indices_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, SpriteClass, "indices=", drb_ffi__ZTS6Sprite_indices_Set, MRB_ARGS_REQ(1));
+    mrb_define_method_f(state, SpriteClass, "foregrounds", drb_ffi__ZTS6Sprite_foregrounds_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, SpriteClass, "foregrounds=", drb_ffi__ZTS6Sprite_foregrounds_Set, MRB_ARGS_REQ(1));
+    mrb_define_method_f(state, SpriteClass, "backgrounds", drb_ffi__ZTS6Sprite_backgrounds_Get, MRB_ARGS_REQ(0));
+    mrb_define_method_f(state, SpriteClass, "backgrounds=", drb_ffi__ZTS6Sprite_backgrounds_Set, MRB_ARGS_REQ(1));
 }
 static int drb_ffi_init_indirect_functions(void *(*lookup)(const char *fnname)) {
   drb_symbol_lookup = lookup;

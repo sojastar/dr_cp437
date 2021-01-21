@@ -850,8 +850,47 @@ void fill_polygon(void) {
 
 
 // --- Sprites :
-void register_sprite(Uint32 width,Uint32 height,Glyph* glyphs) {
+DRB_FFI
+Sprite create_sprite(Uint32 width,Uint32 height) {
+  Sprite* new_sprite      = (Sprite*)calloc(1, sizeof(Sprite));
+
+  new_sprite->width       = width;
+  new_sprite->height      = height;
+  new_sprite->indices     = (Uint8*)calloc(width * height, sizeof(Uint8));
+  new_sprite->foregrounds = (Uint32*)calloc(width * height, sizeof(Uint32));
+  new_sprite->backgrounds = (Uint32*)calloc(width * height, sizeof(Uint32));
+
+  sprites[sprite_count]   = *new_sprite;
+  sprite_count           += 1;
+
+  return *new_sprite;
 }
 
-void draw_sprite_at(Uint32 x,Uint32 y) {
+DRB_FFI
+size_t get_sprite_count(void) {
+  return sprite_count;
+}
+
+void free_sprite(Sprite* sprite) {
+  free(sprite->indices);
+  free(sprite->foregrounds);
+  free(sprite->backgrounds);
+  free(sprite);
+}
+
+DRB_FFI
+void draw_sprite_at(size_t sprite_index,Uint32 x,Uint32 y) {
+  Sprite sprite = sprites[sprite_index];
+
+  for(size_t i = 0; i < sprite.height; i += 1) {
+    for(size_t j = 0; j < sprite.width; j += 1) {
+      size_t glyph_index = i * sprite.width + j;
+
+      console->graphic_context.index       = sprite.indices[glyph_index];
+      console->graphic_context.foreground  = sprite.foregrounds[glyph_index];
+      console->graphic_context.background  = sprite.backgrounds[glyph_index];
+      
+      draw_glyph_at(x+j,y+i);
+    }
+  }
 }

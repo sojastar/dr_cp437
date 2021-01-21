@@ -53,10 +53,25 @@ def setup(args)
   args.state.console.current_glyph_index  = 1
   args.state.console.current_foreground   = [ 255, 0, 0, 255 ]
   args.state.console.current_background   = [ 0, 0, 255, 255 ]
-  vertices  = [ [10, 10], [12, 34], [50, 28], [45, 5] ]
-  #args.state.console.fill_polygon vertices
+  vertices  = [ [5, 5], [7, 18], [35, 19], [38, 4] ]
+  args.state.console.fill_polygon vertices
+
+  bk = CP437::Color::pack_color   0,   0,   0, 255
+  wh = CP437::Color::pack_color 255, 255, 255, 255
+  re = CP437::Color::pack_color 255,   0,   0, 255
+  gr = CP437::Color::pack_color   0, 255,   0, 255
+  bl = CP437::Color::pack_color   0,   0, 255, 255
+
+  args.state.console.register_sprite  :first_sprite,
+                                      4, 4,
+                                      [ [61,wh,bk], [15,re,bk], [15,re,bk], [61,wh,bk],
+                                        [15,re,bk], [15,bl,bk], [15,bl,bk], [15,re,bk],
+                                        [15,re,bk], [15,bl,bk], [15,bl,bk], [15,re,bk],
+                                        [61,wh,bk], [15,re,bk], [15,re,bk], [61,wh,bk] ]
+  args.state.console.draw_sprite_at :first_sprite, 5, 5
 
   args.state.console.draw_string_at "banane !?!", 20, 10
+
   args.state.setup_done = true
   
 end
