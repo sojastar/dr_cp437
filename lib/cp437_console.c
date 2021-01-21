@@ -61,7 +61,6 @@ void init_console(Uint32 width,Uint32 height,char* font_name, Glyph init_glyph) 
   // --- Miscellaneous :
   console->left_scan    = (Uint32*)calloc(height, sizeof(Uint32));
   console->right_scan   = (Uint32*)calloc(height, sizeof(Uint32));
-  console->vertices     = (Uint32*)calloc(2 * MAX_VERTICES, sizeof(Uint32));
   console->vertex_count = 0;
 
   console->drb_upload_pixel_array = drb_symbol_lookup("drb_upload_pixel_array");
@@ -847,4 +846,12 @@ void fill_polygon(void) {
   // Draw the polygon :
   for(i = min_y; i <= max_y; i += 1)
     draw_horizontal_line(console->left_scan[i], console->right_scan[i], i);
+}
+
+
+// --- Sprites :
+void register_sprite(Uint32 width,Uint32 height,Glyph* glyphs) {
+}
+
+void draw_sprite_at(Uint32 x,Uint32 y) {
 }

@@ -31,6 +31,8 @@
 
 #define MAX_VERTICES                        128
 
+#define MAX_SPRITES                         128
+
 
 
 
@@ -93,7 +95,7 @@ typedef struct Console {
   // Rendering :
   Uint32*                   left_scan;
   Uint32*                   right_scan;
-  Uint32*                   vertices;
+  Uint32                    vertices[MAX_VERTICES];
   size_t                    vertex_count;
 
   drb_upload_pixel_array_fn drb_upload_pixel_array;
@@ -102,7 +104,9 @@ typedef struct Console {
 typedef struct Sprite {
   Uint32  width;
   Uint32  height;
-  Glyph*  glyphs;
+  Uint8*  indices;
+  Uint32* foregrounds;
+  Uint32* backgrounds;
 } Sprite;
 
 
@@ -183,9 +187,11 @@ void  draw_sprite_at(Uint32 x,Uint32 y);
 /******************************************************************************/
 /* GLOBAL VARIABLES :                                                         */
 /******************************************************************************/
-Uint8 fonts_count = 3;
-Font* fonts[]     = { &cp437_8x8,
-                      &cp437_8x14,
-                      &cp437_8x16 };
+Uint8     fonts_count = 3;
+Font*     fonts[]     = { &cp437_8x8,
+                          &cp437_8x14,
+                          &cp437_8x16 };
 
-Console *console;
+Console*  console;
+
+Sprite    sprites[MAX_SPRITES];
