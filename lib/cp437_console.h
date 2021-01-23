@@ -143,6 +143,12 @@ void set_gc_foreground(Uint32 foreground);
 void set_gc_clear_background(Uint32 background);
 void set_gc_clear_foreground(Uint32 foreground);
 void set_gc_clear_index(Uint8 index);
+void window_top_left_index(Uint8 index);
+void window_top_right_index(Uint8 index);
+void window_bottom_left_index(Uint8 index);
+void window_bottom_right_index(Uint8 index);
+void window_top_bottom_index(Uint8 index);
+void window_left_right_index(Uint8 index);
 
 // --- DRAWING :
 // --- Clearing the console :

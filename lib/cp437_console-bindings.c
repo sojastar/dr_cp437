@@ -570,6 +570,54 @@ static mrb_value drb_ffi_set_gc_clear_index_Binding(mrb_state *state, mrb_value 
     set_gc_clear_index(index_0);
     return mrb_nil_value();
 }
+static mrb_value drb_ffi_set_gc_window_top_left_index_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint8 index_0 = drb_ffi__ZTSh_FromRuby(state, args[0]);
+    set_gc_window_top_left_index(index_0);
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi_set_gc_window_top_right_index_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint8 index_0 = drb_ffi__ZTSh_FromRuby(state, args[0]);
+    set_gc_window_top_right_index(index_0);
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi_set_gc_window_bottom_left_index_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint8 index_0 = drb_ffi__ZTSh_FromRuby(state, args[0]);
+    set_gc_window_bottom_left_index(index_0);
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi_set_gc_window_bottom_right_index_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint8 index_0 = drb_ffi__ZTSh_FromRuby(state, args[0]);
+    set_gc_window_bottom_right_index(index_0);
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi_set_gc_window_top_bottom_index_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint8 index_0 = drb_ffi__ZTSh_FromRuby(state, args[0]);
+    set_gc_window_top_bottom_index(index_0);
+    return mrb_nil_value();
+}
+static mrb_value drb_ffi_set_gc_window_left_right_index_Binding(mrb_state *state, mrb_value value) {
+    mrb_value *args = 0;
+    mrb_int argc = 0;
+    mrb_get_args_f(state, "*", &args, &argc);
+    Uint8 index_0 = drb_ffi__ZTSh_FromRuby(state, args[0]);
+    set_gc_window_left_right_index(index_0);
+    return mrb_nil_value();
+}
 static mrb_value drb_ffi_clear_console_Binding(mrb_state *state, mrb_value value) {
     clear_console();
     return mrb_nil_value();
@@ -761,6 +809,12 @@ void drb_register_c_extensions(void *(*lookup)(const char *), mrb_state *state, 
     mrb_define_module_function_f(state, module, "set_gc_clear_background", drb_ffi_set_gc_clear_background_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_clear_foreground", drb_ffi_set_gc_clear_foreground_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "set_gc_clear_index", drb_ffi_set_gc_clear_index_Binding, MRB_ARGS_REQ(1));
+    mrb_define_module_function_f(state, module, "set_gc_window_top_left_index", drb_ffi_set_gc_window_top_left_index_Binding, MRB_ARGS_REQ(1));
+    mrb_define_module_function_f(state, module, "set_gc_window_top_right_index", drb_ffi_set_gc_window_top_right_index_Binding, MRB_ARGS_REQ(1));
+    mrb_define_module_function_f(state, module, "set_gc_window_bottom_left_index", drb_ffi_set_gc_window_bottom_left_index_Binding, MRB_ARGS_REQ(1));
+    mrb_define_module_function_f(state, module, "set_gc_window_bottom_right_index", drb_ffi_set_gc_window_bottom_right_index_Binding, MRB_ARGS_REQ(1));
+    mrb_define_module_function_f(state, module, "set_gc_window_top_bottom_index", drb_ffi_set_gc_window_top_bottom_index_Binding, MRB_ARGS_REQ(1));
+    mrb_define_module_function_f(state, module, "set_gc_window_left_right_index", drb_ffi_set_gc_window_left_right_index_Binding, MRB_ARGS_REQ(1));
     mrb_define_module_function_f(state, module, "clear_console", drb_ffi_clear_console_Binding, MRB_ARGS_REQ(0));
     mrb_define_module_function_f(state, module, "get_glyph_at", drb_ffi_get_glyph_at_Binding, MRB_ARGS_REQ(2));
     mrb_define_module_function_f(state, module, "draw_glyph_at", drb_ffi_draw_glyph_at_Binding, MRB_ARGS_REQ(2));

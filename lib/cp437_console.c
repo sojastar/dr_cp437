@@ -30,17 +30,17 @@ void init_console(Uint32 width,Uint32 height,char* font_name, Glyph init_glyph) 
   // --- Setting the graphic context :
   console->graphic_context.font                       = get_font_by_name(font_name);
 
-  console->graphic_context.background                 = init_glyph.background;
-  console->graphic_context.foreground                 = init_glyph.foreground;
   console->graphic_context.index                      = init_glyph.index;
+  console->graphic_context.foreground                 = init_glyph.foreground;
+  console->graphic_context.background                 = init_glyph.background;
 
-  console->graphic_context.clear_background           = init_glyph.background;
-  console->graphic_context.clear_foreground           = init_glyph.foreground;
   console->graphic_context.clear_index                = init_glyph.index;
+  console->graphic_context.clear_foreground           = init_glyph.foreground;
+  console->graphic_context.clear_background           = init_glyph.background;
 
-  console->graphic_context.should_draw_background     = true;
-  console->graphic_context.should_draw_foreground     = true;
   console->graphic_context.should_draw_index          = true;
+  console->graphic_context.should_draw_foreground     = true;
+  console->graphic_context.should_draw_background     = true;
 
   console->graphic_context.window_top_left_index      = THICK_WINDOW_TOP_LEFT_INDEX;
   console->graphic_context.window_top_right_index     = THICK_WINDOW_TOP_RIGHT_INDEX;
@@ -197,6 +197,35 @@ void set_gc_clear_index(Uint8 index) {
   console->graphic_context.clear_index = index;
 }
 
+DRB_FFI
+void set_gc_window_top_left_index(Uint8 index) {
+  console->graphic_context.window_top_left_index      = index;
+}
+
+DRB_FFI
+void set_gc_window_top_right_index(Uint8 index) {
+  console->graphic_context.window_top_right_index     = index;
+}
+
+DRB_FFI
+void set_gc_window_bottom_left_index(Uint8 index) {
+  console->graphic_context.window_bottom_left_index   = index;
+}
+DRB_FFI
+
+void set_gc_window_bottom_right_index(Uint8 index) {
+  console->graphic_context.window_bottom_right_index  = index;
+}
+DRB_FFI
+
+void set_gc_window_top_bottom_index(Uint8 index) {
+  console->graphic_context.window_top_bottom_index    = index;
+}
+
+DRB_FFI
+void set_gc_window_left_right_index(Uint8 index) {
+  console->graphic_context.window_left_right_index    = index;
+}
 
 /* ---=== DRAWING : ===--- */
 
@@ -424,9 +453,9 @@ void draw_antialiased_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
 
   // Chosing the "stepping" glyph :
   if (dx > 0)
-    step_index = dy < 0 ? LINE_BOTTOM_LEFT_TO_TOP_RIGHT_GLYPH : LINE_TOP_LEFT_TO_BOTTOM_RIGHT_GLYPH;
+    step_index = dy > 0 ? LINE_BOTTOM_LEFT_TO_TOP_RIGHT_GLYPH : LINE_TOP_LEFT_TO_BOTTOM_RIGHT_GLYPH;
   else
-    step_index = dy < 0 ? LINE_TOP_LEFT_TO_BOTTOM_RIGHT_GLYPH : LINE_BOTTOM_LEFT_TO_TOP_RIGHT_GLYPH;
+    step_index = dy > 0 ? LINE_TOP_LEFT_TO_BOTTOM_RIGHT_GLYPH : LINE_BOTTOM_LEFT_TO_TOP_RIGHT_GLYPH;
 
   dx = abs(dx);
   dy = abs(dy);
@@ -523,16 +552,16 @@ DRB_FFI
 void draw_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
   Uint8 previous_index  = console->graphic_context.index;
 
-  console->graphic_context.index = console->graphic_context.window_top_left_index;
+  console->graphic_context.index = console->graphic_context.window_bottom_left_index;
   draw_glyph_at(x, y);
 
-  console->graphic_context.index = console->graphic_context.window_top_right_index;
+  console->graphic_context.index = console->graphic_context.window_bottom_right_index;
   draw_glyph_at(x + width - 1, y);
 
-  console->graphic_context.index = console->graphic_context.window_bottom_left_index;
+  console->graphic_context.index = console->graphic_context.window_top_left_index;
   draw_glyph_at(x, y + height - 1);
 
-  console->graphic_context.index = console->graphic_context.window_bottom_right_index;
+  console->graphic_context.index = console->graphic_context.window_top_right_index;
   draw_glyph_at(x + width - 1, y + height - 1);
 
   console->graphic_context.index = console->graphic_context.window_top_bottom_index;
@@ -554,16 +583,16 @@ DRB_FFI
 void draw_thin_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
   Uint8 previous_index  = console->graphic_context.index;
 
-  console->graphic_context.index = THIN_WINDOW_TOP_LEFT_INDEX;
+  console->graphic_context.index = THIN_WINDOW_BOTTOM_LEFT_INDEX;
   draw_glyph_at(x, y);
 
-  console->graphic_context.index = THIN_WINDOW_TOP_RIGHT_INDEX;
+  console->graphic_context.index = THIN_WINDOW_BOTTOM_RIGHT_INDEX;
   draw_glyph_at(x + width - 1, y);
 
-  console->graphic_context.index = THIN_WINDOW_BOTTOM_LEFT_INDEX;
+  console->graphic_context.index = THIN_WINDOW_TOP_LEFT_INDEX;
   draw_glyph_at(x, y + height - 1);
 
-  console->graphic_context.index = THIN_WINDOW_BOTTOM_RIGHT_INDEX;
+  console->graphic_context.index = THIN_WINDOW_TOP_RIGHT_INDEX;
   draw_glyph_at(x + width - 1, y + height - 1);
 
   console->graphic_context.index = THIN_WINDOW_TOP_BOTTOM_INDEX;
@@ -585,16 +614,16 @@ DRB_FFI
 void draw_thick_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
   Uint8 previous_index  = console->graphic_context.index;
 
-  console->graphic_context.index = THICK_WINDOW_TOP_LEFT_INDEX;
+  console->graphic_context.index = THICK_WINDOW_BOTTOM_LEFT_INDEX;
   draw_glyph_at(x, y);
 
-  console->graphic_context.index = THICK_WINDOW_TOP_RIGHT_INDEX;
+  console->graphic_context.index = THICK_WINDOW_BOTTOM_RIGHT_INDEX;
   draw_glyph_at(x + width - 1, y);
 
-  console->graphic_context.index = THICK_WINDOW_BOTTOM_LEFT_INDEX;
+  console->graphic_context.index = THICK_WINDOW_TOP_LEFT_INDEX;
   draw_glyph_at(x, y + height - 1);
 
-  console->graphic_context.index = THICK_WINDOW_BOTTOM_RIGHT_INDEX;
+  console->graphic_context.index = THICK_WINDOW_TOP_RIGHT_INDEX;
   draw_glyph_at(x + width - 1, y + height - 1);
 
   console->graphic_context.index = THICK_WINDOW_TOP_BOTTOM_INDEX;

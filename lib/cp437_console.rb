@@ -1,6 +1,10 @@
 $gtk.ffi_misc.gtk_dlopen("cp437_console")
 
 module CP437
+  FONT_LIST = [ "cp437_8x8",
+                "cp437_8x14",
+                "cp437_8x16" ]
+
   module Glyph
     def self.create(index,background,foreground)
       glyph             = FFI::CP437Console::Glyph.new
@@ -42,11 +46,11 @@ module CP437
 
 
     # ---=== INITIALIZATION : ===---
-    def initialize(x,y,scale,width,height,font,index,background,foreground)
+    def initialize(x,y,width,height,scale,font,index,foreground,background)
       init_glyph            = FFI::CP437Console::Glyph.new
       init_glyph.index      = index 
-      init_glyph.background = CP437::Color::pack_color *background
       init_glyph.foreground = CP437::Color::pack_color *foreground
+      init_glyph.background = CP437::Color::pack_color *background
 
       FFI::CP437Console::init_console width, height, font, init_glyph
 
@@ -121,6 +125,30 @@ module CP437
 
     def current_background=(color)
       FFI::CP437Console.set_gc_background CP437::Color::pack_color(*color)
+    end
+
+    def window_top_left_index=(index)
+      FFI::CP437Console.set_gc_window_top_left_index index
+    end
+
+    def window_top_right_index=(index)
+      FFI::CP437Console.set_gc_window_top_right_index index
+    end
+
+    def window_bottom_left_index=(index)
+      FFI::CP437Console.set_gc_window_bottom_left_index index
+    end
+
+    def window_bottom_right_index=(index)
+      FFI::CP437Console.set_gc_window_bottom_right_index index
+    end
+
+    def window_top_bottom_index=(index)
+      FFI::CP437Console.set_gc_window_top_bottom_index index
+    end
+
+    def window_left_right_index=(index)
+      FFI::CP437Console.set_gc_window_left_right_index index
     end
 
 
