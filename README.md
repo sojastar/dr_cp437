@@ -126,8 +126,8 @@ b = CP437::Color::pack_color    0,   0,   0, 255  # black
 args.state.console.register_sprite  :my_beautiful_sprite,         # sprite tag
                                     2, 2,                         # sprite width and height
                                     [ [ 1, r, b ], [ 1, w, b ],   # a 2x2 red and white checker   ...
-                                      [ 1, w, b ], [ 1, r, b ] ]  # ... pattern with smileys with ...
-                                                                  # ... a black background
+                                      [ 1, w, b ], [ 1, r, b ] ]  # ... pattern with smileys on a ...
+                                                                  # ... black background
 ```
 
 Glyphs with index 0 are considered transparent and will not be drawn.
