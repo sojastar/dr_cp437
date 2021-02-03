@@ -25,12 +25,17 @@ def setup(args)
   # At startup, the console is filled with the same single glyph, glyph      ...
   # color and background color passed as the 3 last arguments.
   #
-  # For this first example, we'll setup a console that will fill the whole   ...
-  # ... DragonRuby window. We chose an 8x8 font, so 160x90 glyphs with a     ...
-  # ... scalling factor of 1 is 1280x720 pixels, exactly the DragonRuby's    ...
+  # For this series of examples, we will setup a console that will fill the  ...
+  # ... whole DragonRuby window. We chose an 8x8 font, so 160x90 glyphs with ...
+  # ... a scalling factor of 1 is 1280x720 pixels, exactly the DragonRuby's  ...
   # ... dimensions. We also chose a single point glyph (index 249 in the     ...
   # ... CP437 table) for the startup fill character so we can immediatly see ...
   # ... if our console was properly initialized.
+
+  # WARNING!!!  WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+  # None of the graphic methods check for out of console boundary access ...
+  # If you try to write outside of the console you app WILL crash!!!
+  # WARNING!!!  WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
 
 
   args.state.console    = CP437::Console.new  0, 0,               # the x and y position of the console
@@ -40,6 +45,44 @@ def setup(args)
                                               249,                # the startup fill glyph index
                                               [64, 64, 64, 255],  # the startup fill glyph color
                                               [ 0,  0,  0, 255]   # the startup fill background color
+
+  # --- Sprite setup :
+
+  # Sprites are rectangular groups of glyphs that can be drawn anywhere in   ...
+  # ... the console. Sprites have to be registered before they can be drawn.
+  # A sprite requires a registration tag ( used as a reference for the       ...
+  # ... drawing method draw_sprite_at ), a width, a height, and lastly some  ...
+  # ... glyph data matching the width and height and properly formated :
+  #  [ [ index_1, foreground_1, background_1 ], ...
+  #    [ index_n, foreground_n, background_n ] ] where n = width * height.
+  # - index is the glyph index in the font
+  # - foreground is the glyph color, properly formated by the                ...
+  #   CP437::Color::pack_color method.
+  # - background is the background color, formated by the same method
+  r = CP437::Color::pack_color  255,   0,   0, 255  # red
+  w = CP437::Color::pack_color  255, 255, 255, 255  # white
+  b = CP437::Color::pack_color    0,   0,   0, 255  # black
+
+  args.state.console.register_sprite( :light_ball,  # sprite tag
+                                      8, 8,         # sprite width and height
+                                      [ [   0, b, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [   0, b, b ],
+                                        [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ],  
+                                        [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ],  
+                                        [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ],  
+                                        [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ],  
+                                        [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ],  
+                                        [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ],  
+                                        [   0, b, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [ 219, r, b ], [ 219, w, b ], [   0, b, b ] ] )
+  args.state.console.register_sprite( :dark_ball,
+                                      8, 8,
+                                      [ [   0, b, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [   0, b, b ],
+                                        [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ],  
+                                        [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ],  
+                                        [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ],  
+                                        [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ],  
+                                        [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ],  
+                                        [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ],  
+                                        [   0, b, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [   0, b, b ] ] )
 
   # --- Demos setup :
   args.state.current_demo     = :single_glyphs_and_strings
@@ -57,7 +100,8 @@ def setup(args)
   args.state.stroke_rectangle = true
   
   args.state.cube_frames      = 0
-  args.state.cube_data        = $gtk.read_file('app/cube_data.json').split("\n").map { |line| $gtk.parse_json(line) }
+  args.state.flat_cube_data   = $gtk.read_file('app/flat_cube_data.json').split("\n").map   { |line| $gtk.parse_json(line) }
+  args.state.sprite_cube_data = $gtk.read_file('app/sprite_cube_data.json').split("\n").map { |line| $gtk.parse_json(line) }
 
   args.state.setup_done       = true
 end
@@ -76,7 +120,7 @@ def tick(args)
   # --- 1. Drawing single glyphs and strings : #################################
   when :single_glyphs_and_strings
     args.state.single_glyph_done  = false
-    unless  args.state.single_glyph_done then
+    unless args.state.single_glyph_done then
 
       # To know what glyphs to draw, the console uses a graphic context that ...
       # ... has to be properly setup before any drawing operation is actually...
@@ -84,11 +128,6 @@ def tick(args)
       # The 3 most common operations are setting the drawing glyph, the      ...
       # ... drawing glyph color and the background color for the subsequent  ...
       # ... drawing calls.
-
-      # WARNING!!!  WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
-      # None of the graphic methods check for out of console boundary access ...
-      # If you try to write outside of the console you app WILL crash!!!
-      # WARNING!!!  WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
 
       # Before drawing anything, let's clear the console. The clear glyph,   ...
       # ... glyph color and background color are automatically set to the    ...
@@ -209,6 +248,8 @@ def tick(args)
     args.state.stroke_rectangle = !args.state.stroke_rectangle  if args.inputs.keyboard.key_down.s
     args.state.current_demo     = :polygons                     if args.inputs.keyboard.key_down.space
 
+
+  # --- 4. Drawing arbitrary polygons : ########################################
   when :polygons
     args.state.console.clear
 
@@ -219,7 +260,7 @@ def tick(args)
     # WARNING : as with all other graphic functions, drawing a polygon  ...
     # ... outside of the console WILL result in unexpected behaviour or ...
     # .. a crash !!!
-    args.state.cube_data[args.state.cube_frames].each do |face|
+    args.state.flat_cube_data[args.state.cube_frames].each do |face|
       args.state.console.current_foreground   = face["color"]
       args.state.console.current_background   = [   0,   0,   0, 255 ]
       args.state.console.current_glyph_index  = face["index"] + 48
@@ -235,7 +276,36 @@ def tick(args)
 
     args.state.current_demo = :sprites  if args.inputs.keyboard.key_down.space
 
+
+  # --- 5. Drawing sprites : ###################################################
   when :sprites
+    args.state.console.clear
+
+    # Finaly, it is also possible to draw previously defined sprites.
+    # Sprites are rectangular groups of glyphs that can be drawn anywhere in ...
+    # ... in the console. Sprites have to be registered before they can be   ...
+    # ... drawn.
+    # A sprite requires a registration tag ( used as a reference for the     ...
+    # ... drawing method draw_sprite_at ), a width, a height, and lastly     ...
+    # ... some glyph data matching the width and height and properly formated :
+    #  [ [ index_1, foreground_1, background_1 ], ...
+    #    [ index_n, foreground_n, background_n ] ] where n = width * height.
+    # - index is the glyph index in the font
+    # - foreground is the glyph color, properly formated by the              ...
+    #   CP437::Color::pack_color method.
+    # - background is the background color, formated by the same method
+    7.downto(0) do |i|
+      x = args.state.sprite_cube_data[args.state.cube_frames][i][0]
+      y = args.state.sprite_cube_data[args.state.cube_frames][i][1]
+      
+      if i < 4 then
+        args.state.console.draw_sprite_at :light_ball, x - 4, y - 4
+      else
+        args.state.console.draw_sprite_at :dark_ball,  x - 4, y - 4
+      end
+    end
+
+    args.state.cube_frames  = ( args.state.cube_frames + 1 ) % 2160
   end
 
   #if args.inputs.keyboard.key_down.space then

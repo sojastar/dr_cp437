@@ -322,7 +322,9 @@ void draw_horizontal_line(Uint32 x1,Uint32 x2,Uint32 y) {
     end   = x1;
   }
 
-  for(size_t x = start; x <= end; x++)
+  //printf("x1: %u, x2: %u, start: %u, end: %u\n", x1, x2, start, end);
+
+  for(Uint32 x = start; x <= end; x += 1)
     draw_glyph_at(x, y);
 }
 
@@ -819,7 +821,7 @@ void fill_polygon(void) {
   Uint32 max_y_index = 0;
   Uint32 min_y_index = 0;
 
-  Uint32 max_y  = console->vertices[0];
+  Uint32 max_y  = console->vertices[1];
   Uint32 min_y  = console->vertices[1];
 
   for(i = 1; i < console->vertex_count; i += 1) {
@@ -915,11 +917,13 @@ void draw_sprite_at(size_t sprite_index,Uint32 x,Uint32 y) {
     for(size_t j = 0; j < sprite.width; j += 1) {
       size_t glyph_index = i * sprite.width + j;
 
-      console->graphic_context.index       = sprite.indices[glyph_index];
-      console->graphic_context.foreground  = sprite.foregrounds[glyph_index];
-      console->graphic_context.background  = sprite.backgrounds[glyph_index];
-      
-      draw_glyph_at(x+j,y+i);
+      if(sprite.indices[glyph_index] != 0) {
+        console->graphic_context.index       = sprite.indices[glyph_index];
+        console->graphic_context.foreground  = sprite.foregrounds[glyph_index];
+        console->graphic_context.background  = sprite.backgrounds[glyph_index];
+
+        draw_glyph_at(x+j,y+i);
+      }
     }
   }
 }

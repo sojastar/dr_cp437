@@ -222,7 +222,7 @@ module CP437
     end
 
     def draw_sprite_at(tag,x,y)
-      FFI::CP437Console::draw_sprite_at @sprites_list[tag][:index], x, y
+      FFI::CP437Console::draw_sprite_at @sprite_list[tag][:index], x, y
     end
 
     def register_sprite(tag,width,height,glyphs)
@@ -234,7 +234,7 @@ module CP437
         new_sprite.backgrounds[i] = glyphs[i][2]
       end
 
-      @sprite_list[tag] = { index:  FFI::CP437Console::get_sprite_count,
+      @sprite_list[tag] = { index:  FFI::CP437Console::get_sprite_count - 1,
                             sprite: new_sprite }
     end
   end
