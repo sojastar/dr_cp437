@@ -212,6 +212,16 @@ module CP437
       FFI::CP437Console.draw_thick_window x, y, width, height
     end
 
+    def stroke_polygon(vertices)
+      vertices.each_cons(2) { |pair| FFI::CP437Console.draw_line(*(pair.flatten)) }
+      FFI::CP437Console.draw_line(*(vertices.last + vertices.first).flatten)
+    end
+
+    def stroke_polygon_antialiased(vertices)
+      vertices.each_cons(2) { |pair| FFI::CP437Console.draw_line(*(pair.flatten)) }
+      FFI::CP437Console.draw_antialiased_line(*(vertices.last + vertices.first).flatten)
+    end
+
     def fill_polygon(vertices)
       FFI::CP437Console.set_polygon_vertex_count vertices.length
       vertices.length.times do |i|
