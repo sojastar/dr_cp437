@@ -127,6 +127,18 @@ module CP437
       FFI::CP437Console.set_gc_background CP437::Color::pack_color(*color)
     end
 
+    def current_clear_glyph_index=(index)
+      FFI::CP437Console.set_gc_clear_index index
+    end
+
+    def current_clear_foreground=(color)
+      FFI::CP437Console.set_gc_clear_foreground CP437::Color::pack_color(*color)
+    end
+
+    def current_clear_background=(color)
+      FFI::CP437Console.set_gc_clear_background CP437::Color::pack_color(*color)
+    end
+
     def window_top_left_index=(index)
       FFI::CP437Console.set_gc_window_top_left_index index
     end
@@ -217,7 +229,7 @@ module CP437
       FFI::CP437Console.draw_line(*(vertices.last + vertices.first).flatten)
     end
 
-    def stroke_polygon_antialiased(vertices)
+    def stroke_antialiased_polygon(vertices)
       vertices.each_cons(2) { |pair| FFI::CP437Console.draw_line(*(pair.flatten)) }
       FFI::CP437Console.draw_antialiased_line(*(vertices.last + vertices.first).flatten)
     end

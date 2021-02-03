@@ -138,11 +138,11 @@ void  set_gc_font(char* const font_name);
 
 // --- Graphic Context :
 void set_gc_index(Uint8 index);
-void set_gc_background(Uint32 background);
 void set_gc_foreground(Uint32 foreground);
-void set_gc_clear_background(Uint32 background);
-void set_gc_clear_foreground(Uint32 foreground);
+void set_gc_background(Uint32 background);
 void set_gc_clear_index(Uint8 index);
+void set_gc_clear_foreground(Uint32 foreground);
+void set_gc_clear_background(Uint32 background);
 void window_top_left_index(Uint8 index);
 void window_top_right_index(Uint8 index);
 void window_bottom_left_index(Uint8 index);
