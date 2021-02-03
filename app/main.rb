@@ -55,6 +55,9 @@ def setup(args)
   args.state.new_height       = ( randv * 37 ).to_i
 
   args.state.stroke_rectangle = true
+  
+  args.state.cube_frames      = 0
+  args.state.cube_data        = $gtk.read_file('app/cube_data.json').split("\n").map { |line| $gtk.parse_json(line) }
 
   args.state.setup_done       = true
 end
@@ -167,7 +170,10 @@ def tick(args)
     args.state.console.draw_window    4, 4, 152, 82
     args.state.console.draw_string_at " a custom window ", 6, 85
 
-    # You can also stroke and fill rectangles :
+    # You can also stroke and fill rectangles.
+    # WARNING : as with all other graphic functions, drawing a rectangle ...
+    # ... outside of the console WILL result in unexpected behaviour or  ...
+    # .. a crash !!!
     if args.state.tick_count % 20 == 0 then
       args.state.new_glyph_index  = randv * 255
       args.state.new_foreground   = [ 150 + randv * 105, 150 + randv * 105, 150 + randv * 105, 255 ]
@@ -204,9 +210,32 @@ def tick(args)
     args.state.current_demo     = :polygons                     if args.inputs.keyboard.key_down.space
 
   when :polygons
-    # You can also draw arbitrary polygons, same as rectangles.
+    args.state.console.clear
 
+    # You can also draw arbitrary polygons. The polygon vertices must be ...
+    # ... passed as an array of pairs of the form:
+    # [ [ x1, y1 ], [ x2, y2 ], ..., [ xn, yn ] ]
+    # The maximum count of vertices is 64.
+    # WARNING : as with all other graphic functions, drawing a polygon  ...
+    # ... outside of the console WILL result in unexpected behaviour or ...
+    # .. a crash !!!
+    args.state.cube_data[args.state.cube_frames].each do |face|
+      args.state.console.current_foreground   = face["color"]
+      args.state.console.current_background   = [   0,   0,   0, 255 ]
+      args.state.console.current_glyph_index  = face["index"] + 48
 
+      args.state.console.fill_polygon face["vertices"]
+    end
+
+    args.state.cube_frames  = ( args.state.cube_frames + 1 ) % 2160
+
+    args.state.console.current_foreground   = [ 255, 255, 255, 255 ]
+    args.state.console.current_background   = [   0,   0,   0, 255 ]
+    args.state.console.draw_string_at "- space : next sample -", 69, 6
+
+    args.state.current_demo = :sprites  if args.inputs.keyboard.key_down.space
+
+  when :sprites
   end
 
   #if args.inputs.keyboard.key_down.space then
