@@ -308,27 +308,11 @@ def tick(args)
     args.state.cube_frames  = ( args.state.cube_frames + 1 ) % 2160
   end
 
-  #if args.inputs.keyboard.key_down.space then
-  #  args.state.font_index   = ( args.state.font_index + 1 ) % FONT_LIST.length
-  #  args.state.console.font = FONT_LIST[args.state.font_index]
-  #end
 
-  #if args.inputs.keyboard.key_down.plus then
-  #  new_width   = args.state.console.width  + 1
-  #  new_height  = args.state.console.height + 1
-  #  args.state.console.resize new_width, new_height
-  #end
-
-  #if args.inputs.keyboard.key_down.hyphen then
-  #  new_width   = args.state.console.width  - 1
-  #  new_height  = args.state.console.height - 1
-  #  args.state.console.resize new_width, new_height
-  #end
-
+  # !!! DON'T FORGET TO RENDER THE CONSOLE !!!
   args.state.console.render(args)
+  # !!! DON'T FORGET TO RENDER THE CONSOLE !!!
 
-  #args.outputs.labels << [ 20, 700, "mouse position: #{mouse_x},#{mouse_y} with glyph: #{glyph}.", 255, 255, 255, 255 ]
-  #args.outputs.primitives << args.gtk.current_framerate_primitives
 end
 
 def randv
