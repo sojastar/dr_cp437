@@ -42,6 +42,12 @@ To know what glyph to draw, the console uses a graphic context that has to be pr
 The clear glyph, glyph color and background color are automatically set to the startup fill parameters but can be modified by setting the `current_clear_glyph_index`, `current_clear_foreground` and `current_clear_background` attributes.
 
 
+## Drawing a text string:
+
+```ruby
+args.state.console.draw_string_at 'A Beautiful String...', 10, 20
+```
+
 ## Drawing lines :
 
 There are two types of lines: normal and antialiased.
