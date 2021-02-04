@@ -118,8 +118,8 @@ The maximum vertex count for a polygon is 64.
 ## Drawing sprites:
 
 Sprites are rectangular groups of glyphs that can be drawn anywhere in the console. Sprites have to be registered before they can be drawn. A sprite requires a registration tag (used as a reference for the drawing method draw_sprite_at), a width, a height, and lastly some glyph data matching the width and height and properly formated :
-  [ [ index_1, foreground_1, background_1 ], ...
-  [ index_n, foreground_n, background_n ] ] where n = width * height.
+ `[ [ index_1, foreground_1, background_1 ], ...
+    [ index_n, foreground_n, background_n ] ]` where n = width * height.
 * index is the glyph index in the font
 * foreground is the glyph color, properly formated by the CP437::Color::pack_color method.
 * background is the background color, formated by the same method
