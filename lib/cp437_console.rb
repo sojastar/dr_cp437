@@ -52,28 +52,28 @@ module CP437
       init_glyph.foreground = CP437::Color::pack_color *foreground
       init_glyph.background = CP437::Color::pack_color *background
 
-      FFI::CP437Console::init_console width, height, font, init_glyph
+      @c_console            = FFI::CP437Console::init_console width, height, font, init_glyph
 
-      @x, @y, @scale  = x, y, scale
+      @x, @y, @scale        = x, y, scale
 
-      @width          = width
-      @height         = height
+      @width                = width
+      @height               = height
 
-      @pixel_width    = FFI::CP437Console.get_console_pixel_width
-      @pixel_height   = FFI::CP437Console.get_console_pixel_height
+      @pixel_width          = FFI::CP437Console.get_console_pixel_width(@c_console)
+      @pixel_height         = FFI::CP437Console.get_console_pixel_height(@c_console)
 
-      @font_width     = FFI::CP437Console.get_current_font.width
-      @font_height    = FFI::CP437Console.get_current_font.height
+      @font_width           = FFI::CP437Console.get_current_font(@c_console).width
+      @font_height          = FFI::CP437Console.get_current_font(@c_console).height
 
-      @vertices       = FFI::CP437Console.get_polygon_vertices_array
+      @vertices             = FFI::CP437Console.get_polygon_vertices_array(@c_console)
 
-      @sprite_list    = {}
+      @sprite_list          = {}
     end
 
 
     # ---=== RENDERING : ===---
     def render(args)
-      FFI::CP437Console::update_console
+      FFI::CP437Console::update_console(@c_console)
 
       args.outputs.primitives << [@x,
                                   @y,
@@ -85,25 +85,25 @@ module CP437
 
     # ---=== GEOMETRY MANAGEMENT : ===---
     def resize(width,height)
-      FFI::CP437Console.resize_console width, height
+      FFI::CP437Console.resize_console(@c_console, width, height)
       @width        = width
       @height       = height
-      @pixel_width  = FFI::CP437Console.get_console_pixel_width
-      @pixel_height = FFI::CP437Console.get_console_pixel_height
+      @pixel_width  = FFI::CP437Console.get_console_pixel_width(@c_console)
+      @pixel_height = FFI::CP437Console.get_console_pixel_heigh(@c_console)
     end
 
 
     # ---=== FONT MANAGEMENT : ===---
     def font
-      FFI::CP437Console.get_current_font
+      FFI::CP437Console.get_current_font(@c_console)
     end
 
     def font=(font_name)
       FFI::CP437Console.set_gc_font font_name
-      @pixel_width  = FFI::CP437Console.get_console_pixel_width
-      @pixel_height = FFI::CP437Console.get_console_pixel_height
-      @font_width   = FFI::CP437Console.get_current_font.width
-      @font_height  = FFI::CP437Console.get_current_font.height
+      @pixel_width  = FFI::CP437Console.get_console_pixel_width(@c_console)
+      @pixel_height = FFI::CP437Console.get_console_pixel_height(@c_console)
+      @font_width   = FFI::CP437Console.get_current_font(@c_console).width
+      @font_height  = FFI::CP437Console.get_current_font(@c_console).height
     end
 
 
@@ -116,51 +116,51 @@ module CP437
 
     # ---=== GRAPHIC CONTEXT : ===---
     def current_glyph_index=(index)
-      FFI::CP437Console.set_gc_index index
+      FFI::CP437Console.set_gc_index(@c_console, index)
     end
 
     def current_foreground=(color)
-      FFI::CP437Console.set_gc_foreground CP437::Color::pack_color(*color)
+      FFI::CP437Console.set_gc_foreground(@c_console, CP437::Color::pack_color(*color))
     end
 
     def current_background=(color)
-      FFI::CP437Console.set_gc_background CP437::Color::pack_color(*color)
+      FFI::CP437Console.set_gc_background(@c_console, CP437::Color::pack_color(*color))
     end
 
     def current_clear_glyph_index=(index)
-      FFI::CP437Console.set_gc_clear_index index
+      FFI::CP437Console.set_gc_clear_index(@c_console, index)
     end
 
     def current_clear_foreground=(color)
-      FFI::CP437Console.set_gc_clear_foreground CP437::Color::pack_color(*color)
+      FFI::CP437Console.set_gc_clear_foreground(@c_console, CP437::Color::pack_color(*color))
     end
 
     def current_clear_background=(color)
-      FFI::CP437Console.set_gc_clear_background CP437::Color::pack_color(*color)
+      FFI::CP437Console.set_gc_clear_background(@c_console, CP437::Color::pack_color(*color))
     end
 
     def window_top_left_index=(index)
-      FFI::CP437Console.set_gc_window_top_left_index index
+      FFI::CP437Console.set_gc_window_top_left_index(@c_console, index)
     end
 
     def window_top_right_index=(index)
-      FFI::CP437Console.set_gc_window_top_right_index index
+      FFI::CP437Console.set_gc_window_top_right_index(@c_console, index)
     end
 
     def window_bottom_left_index=(index)
-      FFI::CP437Console.set_gc_window_bottom_left_index index
+      FFI::CP437Console.set_gc_window_bottom_left_index(@c_console, index)
     end
 
     def window_bottom_right_index=(index)
-      FFI::CP437Console.set_gc_window_bottom_right_index index
+      FFI::CP437Console.set_gc_window_bottom_right_index(@c_console, index)
     end
 
     def window_top_bottom_index=(index)
-      FFI::CP437Console.set_gc_window_top_bottom_index index
+      FFI::CP437Console.set_gc_window_top_bottom_index(@c_console, index)
     end
 
     def window_left_right_index=(index)
-      FFI::CP437Console.set_gc_window_left_right_index index
+      FFI::CP437Console.set_gc_window_left_right_index(@c_console, index)
     end
 
 
@@ -168,87 +168,87 @@ module CP437
     
     # --- Clearing :
     def clear
-      FFI::CP437Console.clear_console()
+      FFI::CP437Console.clear_console(@c_console)
     end
 
     # --- Single glyphs :
     def glyph_at(x,y)
-      FFI::CP437Console.get_glyph_at(x,y)
+      FFI::CP437Console.get_glyph_at(@c_console, x, y)
     end
 
     def draw_glyph_at(x,y)
-      FFI::CP437Console.draw_glyph_at x, y
+      FFI::CP437Console.draw_glyph_at(@c_console, x, y)
     end
 
     # --- Strings :
     def draw_string_at(string,x,y)
-      FFI::CP437Console.draw_string_at string, x, y
+      FFI::CP437Console.draw_string_at(@c_console, string, x, y)
     end
 
     # --- Lines :
     def draw_horizontal_line(x1,x2,y)
-      FFI::CP437Console.draw_horizontal_line x1, x2, y
+      FFI::CP437Console.draw_horizontal_line(@c_console, x1, x2, y)
     end
 
     def draw_vertical_line(x,y1,y2)
-      FFI::CP437Console.draw_vertical_line x, y1, y2
+      FFI::CP437Console.draw_vertical_line(@c_console, x, y1, y2)
     end
 
     def draw_line(x1,y1,x2,y2)
-      FFI::CP437Console.draw_line x1, y1, x2, y2
+      FFI::CP437Console.draw_line(@c_console, x1, y1, x2, y2)
     end
 
     def draw_antialiased_line(x1,y1,x2,y2)
-      FFI::CP437Console.draw_antialiased_line x1, y1, x2, y2
+      FFI::CP437Console.draw_antialiased_line(@c_console, x1, y1, x2, y2)
     end
 
     # --- Rectangles :
     def stroke_rectangle(x,y,width,height)
-      FFI::CP437Console.stroke_rectangle x, y, width, height
+      FFI::CP437Console.stroke_rectangle(@c_console, x, y, width, height)
     end
 
     def fill_rectangle(x,y,width,height)
-      FFI::CP437Console.fill_rectangle x, y, width, height
+      FFI::CP437Console.fill_rectangle(@c_console, x, y, width, height)
     end
 
     # --- Windows :
     def draw_window(x,y,width,height)
-      FFI::CP437Console.draw_window x, y, width, height
+      FFI::CP437Console.draw_window(@c_console, x, y, width, height)
     end
 
     def draw_thin_window(x,y,width,height)
-      FFI::CP437Console.draw_thin_window x, y, width, height
+      FFI::CP437Console.draw_thin_window(@c_console, x, y, width, height)
     end
 
     def draw_thick_window(x,y,width,height)
-      FFI::CP437Console.draw_thick_window x, y, width, height
+      FFI::CP437Console.draw_thick_window(@c_console, x, y, width, height)
     end
 
     def stroke_polygon(vertices)
-      vertices.each_cons(2) { |pair| FFI::CP437Console.draw_line(*(pair.flatten)) }
-      FFI::CP437Console.draw_line(*(vertices.last + vertices.first).flatten)
+      vertices.each_cons(2) { |pair| FFI::CP437Console.draw_line(@c_console, *(pair.flatten)) }
+      FFI::CP437Console.draw_line(@c_console, *(vertices.last + vertices.first).flatten)
     end
 
     def stroke_antialiased_polygon(vertices)
-      vertices.each_cons(2) { |pair| FFI::CP437Console.draw_line(*(pair.flatten)) }
-      FFI::CP437Console.draw_antialiased_line(*(vertices.last + vertices.first).flatten)
+      vertices.each_cons(2) { |pair| FFI::CP437Console.draw_line(@c_console, *(pair.flatten)) }
+      FFI::CP437Console.draw_antialiased_line(@c_console, *(vertices.last + vertices.first).flatten)
     end
 
     def fill_polygon(vertices)
-      FFI::CP437Console.set_polygon_vertex_count vertices.length
+      FFI::CP437Console.set_polygon_vertex_count(@c_console, vertices.length)
       vertices.length.times do |i|
         @vertices[2*i]    = vertices[i][0]
         @vertices[2*i+1]  = vertices[i][1]
       end
-      FFI::CP437Console.fill_polygon
+      FFI::CP437Console.fill_polygon(@c_console)
     end
 
     def draw_sprite_at(tag,x,y)
-      FFI::CP437Console::draw_sprite_at @sprite_list[tag][:index], x, y
+      FFI::CP437Console::draw_sprite_at(@c_console, @sprite_list[tag][:index], x, y)
     end
 
     def register_sprite(tag,width,height,glyphs)
-      new_sprite          = FFI::CP437Console::create_sprite(width, height)
+      new_sprite          = FFI::CP437Console::create_sprite(@c_console, width, height)
 
       (width * height).times do |i|
         new_sprite.indices[i]     = glyphs[i][0]
@@ -256,7 +256,7 @@ module CP437
         new_sprite.backgrounds[i] = glyphs[i][2]
       end
 
-      @sprite_list[tag] = { index:  FFI::CP437Console::get_sprite_count - 1,
+      @sprite_list[tag] = { index:  FFI::CP437Console::get_sprite_count(@c_console) - 1,
                             sprite: new_sprite }
     end
   end

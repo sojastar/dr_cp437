@@ -4,6 +4,9 @@
 #include <math.h>
 #include <dragonruby.h>
 #include "cp437_console.h"
+#include "cp437_8x8.h"
+#include "cp437_8x14.h"
+#include "cp437_8x16.h"
 
 
 
@@ -15,9 +18,16 @@
 
 /* ---=== CREATOR AND DESTRUCTOR : ===--- */
 DRB_FFI
-void init_console(Uint32 width,Uint32 height,char* font_name, Glyph init_glyph) {
+Console* init_console(Uint32 width,Uint32 height,char* font_name,Glyph init_glyph) {
   // --- Creating the console :
-  console         = (Console *)malloc(sizeof(Console));
+  Console* console  = (Console *)malloc(sizeof(Console));
+
+  // --- Fonts :
+  console->fonts_count  = 3;
+  console->fonts        = (Font**)malloc(console->fonts_count * sizeof(Font*));
+  console->fonts[0]     = &cp437_8x8;
+  console->fonts[1]     = &cp437_8x14;
+  console->fonts[2]     = &cp437_8x16;
 
   // --- Setting the console's dimensions :
   console->width  = width;
@@ -28,7 +38,7 @@ void init_console(Uint32 width,Uint32 height,char* font_name, Glyph init_glyph) 
   console->glyphs = (Glyph*)calloc(console->size, sizeof(Glyph));
 
   // --- Setting the graphic context :
-  console->graphic_context.font                       = get_font_by_name(font_name);
+  console->graphic_context.font                       = get_font_by_name(console, font_name);
 
   console->graphic_context.index                      = init_glyph.index;
   console->graphic_context.foreground                 = init_glyph.foreground;
@@ -54,20 +64,28 @@ void init_console(Uint32 width,Uint32 height,char* font_name, Glyph init_glyph) 
   console->pixel_height = height * console->graphic_context.font->height;
   console->pixels       = (Uint32*)calloc(console->pixel_width * console->pixel_height, sizeof(Uint32));
 
-  for(size_t i = 0; i < console->height; i+=1)
-    for(size_t j = 0; j < console->width; j+=1)
-      draw_glyph_at(j, i);
+  for(size_t i = 0; i < height; i+=1)
+    for(size_t j = 0; j < width; j+=1)
+      draw_glyph_at(console, j, i);
 
-  // --- Miscellaneous :
+  // --- Rendering :
   console->left_scan    = (Uint32*)calloc(height, sizeof(Uint32));
   console->right_scan   = (Uint32*)calloc(height, sizeof(Uint32));
+  console->vertices     = (Uint32*)calloc(2 * MAX_VERTICES, sizeof(Uint32));
   console->vertex_count = 0;
 
+  // --- Sprites :
+  console->sprites      = (Sprite*)calloc(MAX_SPRITES, sizeof(Sprite));
+  console->sprite_count = 0;
+
+  // --- Miscellaneous :
   console->drb_upload_pixel_array = drb_symbol_lookup("drb_upload_pixel_array");
+
+  return console;
 }
 
 DRB_FFI
-void delete_console(void) {
+void free_console(Console* console) {
   free(console->glyphs);
   free(console->pixels);
   free(console);
@@ -76,7 +94,7 @@ void delete_console(void) {
 
 /* ---=== UPDATE : ===--- */
 DRB_FFI
-void update_console(void) {
+void update_console(Console* console) {
   console->drb_upload_pixel_array(  "console",
                                     console->pixel_width,
                                     console->pixel_height,
@@ -86,27 +104,27 @@ void update_console(void) {
 
 /* ---=== GEOMETRY MANAGEMENT : ===--- */
 DRB_FFI
-int get_console_width(void) {
+int get_console_width(Console* console) {
   return console->width;
 }
 
 DRB_FFI
-int get_console_height(void) {
+int get_console_height(Console* console) {
   return console->height;
 }
 
 DRB_FFI
-int get_console_pixel_width(void) {
+int get_console_pixel_width(Console* console) {
   return console->graphic_context.font->width * console->width;
 }
 
 DRB_FFI
-int get_console_pixel_height(void) {
+int get_console_pixel_height(Console* console) {
   return console->graphic_context.font->height * console->height;
 }
 
 DRB_FFI
-void resize_console(Uint32 width,Uint32 height) {
+void resize_console(Console* console,Uint32 width,Uint32 height) {
   // --- Resetting the console's dimensions :
   console->width  = width;
   console->height = height;
@@ -120,7 +138,7 @@ void resize_console(Uint32 width,Uint32 height) {
   console->pixel_height = height * console->graphic_context.font->height;
   console->pixels       = (Uint32*)calloc(console->pixel_width * console->pixel_height, sizeof(Uint32));
 
-  clear_console();
+  clear_console(console);
 
   // --- Miscellaneous :
   console->left_scan  = (Uint32*)malloc(height * sizeof(Uint32));
@@ -129,23 +147,23 @@ void resize_console(Uint32 width,Uint32 height) {
 
 
 /* ---=== FONT MANAGEMENT : ===--- */
-Font* get_font_by_name(char* font_name) {
-  for(size_t i = 0; i < fonts_count; i += 1) {
-    if(strcmp(fonts[i]->name, font_name) == 0)
-      return fonts[i];
+Font* get_font_by_name(Console* console,char* font_name) {
+  for(size_t i = 0; i < console->fonts_count; i += 1) {
+    if(strcmp(console->fonts[i]->name, font_name) == 0)
+      return console->fonts[i];
   }
 
   return NULL;
 }
 
 DRB_FFI
-Font get_current_font(void) {
+Font get_current_font(Console* console) {
   return *(console->graphic_context.font);
 }
 
 DRB_FFI
-void set_gc_font(char* const font_name) {
-  console->graphic_context.font = get_font_by_name(font_name);
+void set_gc_font(Console* console,char* const font_name) {
+  console->graphic_context.font = get_font_by_name(console, font_name);
 
   // --- Resetting the console's pixel array :
   free(console->pixels);
@@ -160,7 +178,7 @@ void set_gc_font(char* const font_name) {
       console->graphic_context.index      = glyph.index;
       console->graphic_context.foreground = glyph.foreground;
       console->graphic_context.background = glyph.background;
-      draw_glyph_at(j, i);
+      draw_glyph_at(console, j, i);
     }
   }
 }
@@ -168,62 +186,62 @@ void set_gc_font(char* const font_name) {
 
 /* ---=== GRAPHIC CONTEXT : ===--- */
 DRB_FFI
-void set_gc_index(Uint8 index) {
+void set_gc_index(Console* console,Uint8 index) {
   console->graphic_context.index = index;
 }
 
 DRB_FFI
-void set_gc_background(Uint32 background) {
+void set_gc_background(Console* console,Uint32 background) {
   console->graphic_context.background = background;
 }
 
 DRB_FFI
-void set_gc_foreground(Uint32 foreground) {
+void set_gc_foreground(Console* console,Uint32 foreground) {
   console->graphic_context.foreground = foreground;
 }
 
 DRB_FFI
-void set_gc_clear_background(Uint32 background) {
+void set_gc_clear_background(Console* console,Uint32 background) {
   console->graphic_context.clear_background = background;
 }
 
 DRB_FFI
-void set_gc_clear_foreground(Uint32 foreground) {
+void set_gc_clear_foreground(Console* console,Uint32 foreground) {
   console->graphic_context.clear_foreground = foreground;
 }
 
 DRB_FFI
-void set_gc_clear_index(Uint8 index) {
+void set_gc_clear_index(Console* console,Uint8 index) {
   console->graphic_context.clear_index = index;
 }
 
 DRB_FFI
-void set_gc_window_top_left_index(Uint8 index) {
+void set_gc_window_top_left_index(Console* console,Uint8 index) {
   console->graphic_context.window_top_left_index      = index;
 }
 
 DRB_FFI
-void set_gc_window_top_right_index(Uint8 index) {
+void set_gc_window_top_right_index(Console* console,Uint8 index) {
   console->graphic_context.window_top_right_index     = index;
 }
 
 DRB_FFI
-void set_gc_window_bottom_left_index(Uint8 index) {
+void set_gc_window_bottom_left_index(Console* console,Uint8 index) {
   console->graphic_context.window_bottom_left_index   = index;
 }
 DRB_FFI
 
-void set_gc_window_bottom_right_index(Uint8 index) {
+void set_gc_window_bottom_right_index(Console* console,Uint8 index) {
   console->graphic_context.window_bottom_right_index  = index;
 }
 DRB_FFI
 
-void set_gc_window_top_bottom_index(Uint8 index) {
+void set_gc_window_top_bottom_index(Console* console,Uint8 index) {
   console->graphic_context.window_top_bottom_index    = index;
 }
 
 DRB_FFI
-void set_gc_window_left_right_index(Uint8 index) {
+void set_gc_window_left_right_index(Console* console,Uint8 index) {
   console->graphic_context.window_left_right_index    = index;
 }
 
@@ -231,7 +249,7 @@ void set_gc_window_left_right_index(Uint8 index) {
 
 // --- Clearing the console :
 DRB_FFI
-void clear_console(void) {
+void clear_console(Console* console) {
   // Saving the current drawing glyph... :
   Uint8   previous_index              = console->graphic_context.index;
   Uint32  previous_foreground         = console->graphic_context.foreground;
@@ -245,7 +263,7 @@ void clear_console(void) {
   // Drawing the clear glyph all over the console :
   for(size_t y = 0; y < console->height; y+=1)
     for(size_t x = 0; x < console->width; x+=1)
-      draw_glyph_at(x, y);
+      draw_glyph_at(console, x, y);
 
   // Restoring the drawing glyph :
   console->graphic_context.index      = previous_index;
@@ -256,7 +274,7 @@ void clear_console(void) {
 
 // --- Single Glyphs :
 DRB_FFI
-Glyph get_glyph_at(Uint32 x,Uint32 y) {
+Glyph get_glyph_at(Console* console,Uint32 x,Uint32 y) {
   Glyph empty = {
     .index      = 0,
     .foreground = 0,
@@ -270,7 +288,7 @@ Glyph get_glyph_at(Uint32 x,Uint32 y) {
 }
 
 DRB_FFI
-void draw_glyph_at(Uint32 x,Uint32 y) {
+void draw_glyph_at(Console* console,Uint32 x,Uint32 y) {
   // --- What glyph are we talking about ?
   Uint32  glyph_offset  = ( console->height - y -1 ) * console->width + x;
 
@@ -300,17 +318,17 @@ void draw_glyph_at(Uint32 x,Uint32 y) {
 
 // --- Strings :
 DRB_FFI
-void draw_string_at(char* const string,Uint32 x,Uint32 y) {
+void draw_string_at(Console* console,char* const string,Uint32 x,Uint32 y) {
   for(size_t i = 0; i < string[i]; i += 1) {
-    set_gc_index((Uint8)string[i]);
-    draw_glyph_at(x + i, y);
+    set_gc_index(console, (Uint8)string[i]);
+    draw_glyph_at(console, x + i, y);
   }
 }
 
 
 // --- Lines :
 DRB_FFI
-void draw_horizontal_line(Uint32 x1,Uint32 x2,Uint32 y) {
+void draw_horizontal_line(Console* console,Uint32 x1,Uint32 x2,Uint32 y) {
   Uint32 start, end;
 
   if (x1 <= x2) {
@@ -322,14 +340,12 @@ void draw_horizontal_line(Uint32 x1,Uint32 x2,Uint32 y) {
     end   = x1;
   }
 
-  //printf("x1: %u, x2: %u, start: %u, end: %u\n", x1, x2, start, end);
-
   for(Uint32 x = start; x <= end; x += 1)
-    draw_glyph_at(x, y);
+    draw_glyph_at(console, x, y);
 }
 
 DRB_FFI
-void draw_vertical_line(Uint32 x,Uint32 y1,Uint32 y2) {
+void draw_vertical_line(Console* console,Uint32 x,Uint32 y1,Uint32 y2) {
   Uint32 start, end;
 
   if (y1 <= y2) {
@@ -342,11 +358,11 @@ void draw_vertical_line(Uint32 x,Uint32 y1,Uint32 y2) {
   }
 
   for(size_t y = start; y <= end; y++)
-    draw_glyph_at(x, y);
+    draw_glyph_at(console, x, y);
 }
 
 DRB_FFI
-void draw_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
+void draw_line(Console* console,Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
   int x, y, dx, dy, x_increment, y_increment, d;
 
   // Set-up of the bresenham algorythm :
@@ -362,12 +378,12 @@ void draw_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
 
   // Edge cases :
   if (dx == 0) {  // vertical line
-    draw_vertical_line(x1, y1, y2);
+    draw_vertical_line(console, x1, y1, y2);
     return;
   }
 
   if (dy == 0) {  // horizontal line
-    draw_horizontal_line(x1, x2, y1);
+    draw_horizontal_line(console, x1, x2, y1);
     return;
   }
 
@@ -378,7 +394,7 @@ void draw_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
   // Drawing the line :
 
   // First Point :
-  draw_glyph_at(x1, y1);
+  draw_glyph_at(console, x1, y1);
 
   // Rest of the Line :
   if (dx > dy) {
@@ -392,13 +408,13 @@ void draw_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
       if (d >= dx) {
         d -= dx;
         y += y_increment;
-        draw_glyph_at(x, y);
+        draw_glyph_at(console, x, y);
       }
       else {
         if (y_increment < 0)
-          draw_glyph_at(x, y);
+          draw_glyph_at(console, x, y);
         else
-          draw_glyph_at(x, y + 1);
+          draw_glyph_at(console, x, y + 1);
       }
     }
   }
@@ -414,13 +430,13 @@ void draw_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
         x += x_increment;
       }
 
-      draw_glyph_at(x, y);
+      draw_glyph_at(console, x, y);
     }
   }
 }
 
 DRB_FFI
-void draw_antialiased_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
+void draw_antialiased_line(Console* console,Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
   int     x, y, dx, dy, x_increment, y_increment, d;
   Uint8   step_index, previous_index;
   float   tan;
@@ -440,7 +456,7 @@ void draw_antialiased_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
   if (dx == 0) {  // vertical line
     previous_index                  = console->graphic_context.index;
     console->graphic_context.index  = LINE_VERTICAL_GLYPH;
-    draw_vertical_line(x1, y1, y2);
+    draw_vertical_line(console, x1, y1, y2);
     console->graphic_context.index  = previous_index;
     return;
   }
@@ -448,7 +464,7 @@ void draw_antialiased_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
   if (dy == 0) {  // horizontal line
     previous_index                  = console->graphic_context.index;
     console->graphic_context.index  = LINE_HORIZONTAL_GLYPH;
-    draw_horizontal_line(x1, x2, y1);
+    draw_horizontal_line(console, x1, x2, y1);
     console->graphic_context.index  = previous_index;
     return;
   }
@@ -478,7 +494,7 @@ void draw_antialiased_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
       console->graphic_context.index  = LINE_VERTICAL_GLYPH;
   }
 
-  draw_glyph_at(x1, y1);
+  draw_glyph_at(console, x1, y1);
 
   // Rest of the Line :
   if (dx > dy) {
@@ -494,15 +510,15 @@ void draw_antialiased_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
         y += y_increment;
 
         console->graphic_context.index  = step_index;
-        draw_glyph_at(x, y);
+        draw_glyph_at(console, x, y);
       }
       else {
         console->graphic_context.index  = LINE_HORIZONTAL_GLYPH;
 
         if (y_increment < 0)
-          draw_glyph_at(x, y);
+          draw_glyph_at(console, x, y);
         else
-          draw_glyph_at(x, y + 1);
+          draw_glyph_at(console, x, y + 1);
       }
     }
   }
@@ -521,7 +537,7 @@ void draw_antialiased_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
       else
         console->graphic_context.index  = LINE_VERTICAL_GLYPH;
 
-      draw_glyph_at(x, y);
+      draw_glyph_at(console, x, y);
     }
   }
 
@@ -530,114 +546,114 @@ void draw_antialiased_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
 
 // --- Rectangles :
 DRB_FFI
-void stroke_rectangle(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
+void stroke_rectangle(Console* console,Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
   for(size_t i = x; i < x + width; i += 1) {
-    draw_glyph_at(i, y);
-    draw_glyph_at(i, y + height - 1);
+    draw_glyph_at(console, i, y);
+    draw_glyph_at(console, i, y + height - 1);
   }
   for(size_t i = y + 1; i < y + height - 1; i += 1) {
-    draw_glyph_at(x, i);
-    draw_glyph_at(x + width - 1, i);
+    draw_glyph_at(console, x, i);
+    draw_glyph_at(console, x + width - 1, i);
   }
 }
 
 DRB_FFI
-void fill_rectangle(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
+void fill_rectangle(Console* console,Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
   for(size_t i = y; i < y + height - 1; i += 1)
     for(size_t j = x; j < x + width - 1; j += 1)
-      draw_glyph_at(j, i);
+      draw_glyph_at(console, j, i);
 }
 
 
 // --- Windows :
 DRB_FFI
-void draw_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
+void draw_window(Console* console,Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
   Uint8 previous_index  = console->graphic_context.index;
 
   console->graphic_context.index = console->graphic_context.window_bottom_left_index;
-  draw_glyph_at(x, y);
+  draw_glyph_at(console, x, y);
 
   console->graphic_context.index = console->graphic_context.window_bottom_right_index;
-  draw_glyph_at(x + width - 1, y);
+  draw_glyph_at(console, x + width - 1, y);
 
   console->graphic_context.index = console->graphic_context.window_top_left_index;
-  draw_glyph_at(x, y + height - 1);
+  draw_glyph_at(console, x, y + height - 1);
 
   console->graphic_context.index = console->graphic_context.window_top_right_index;
-  draw_glyph_at(x + width - 1, y + height - 1);
+  draw_glyph_at(console, x + width - 1, y + height - 1);
 
   console->graphic_context.index = console->graphic_context.window_top_bottom_index;
   for(size_t i = x + 1; i < x + width - 1; i += 1) {
-    draw_glyph_at(i, y);
-    draw_glyph_at(i, y + height - 1);
+    draw_glyph_at(console, i, y);
+    draw_glyph_at(console, i, y + height - 1);
   }
 
   console->graphic_context.index = console->graphic_context.window_left_right_index;
   for(size_t i = y + 1; i < y + height - 1; i += 1) {
-    draw_glyph_at(x, i);
-    draw_glyph_at(x + width - 1, i);
+    draw_glyph_at(console, x, i);
+    draw_glyph_at(console, x + width - 1, i);
   }
 
   console->graphic_context.index  = previous_index;
 }
 
 DRB_FFI
-void draw_thin_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
+void draw_thin_window(Console* console,Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
   Uint8 previous_index  = console->graphic_context.index;
 
   console->graphic_context.index = THIN_WINDOW_BOTTOM_LEFT_INDEX;
-  draw_glyph_at(x, y);
+  draw_glyph_at(console, x, y);
 
   console->graphic_context.index = THIN_WINDOW_BOTTOM_RIGHT_INDEX;
-  draw_glyph_at(x + width - 1, y);
+  draw_glyph_at(console, x + width - 1, y);
 
   console->graphic_context.index = THIN_WINDOW_TOP_LEFT_INDEX;
-  draw_glyph_at(x, y + height - 1);
+  draw_glyph_at(console, x, y + height - 1);
 
   console->graphic_context.index = THIN_WINDOW_TOP_RIGHT_INDEX;
-  draw_glyph_at(x + width - 1, y + height - 1);
+  draw_glyph_at(console, x + width - 1, y + height - 1);
 
   console->graphic_context.index = THIN_WINDOW_TOP_BOTTOM_INDEX;
   for(size_t i = x + 1; i < x + width - 1; i += 1) {
-    draw_glyph_at(i, y);
-    draw_glyph_at(i, y + height - 1);
+    draw_glyph_at(console, i, y);
+    draw_glyph_at(console, i, y + height - 1);
   }
 
   console->graphic_context.index = THIN_WINDOW_LEFT_RIGHT_INDEX;
   for(size_t i = y + 1; i < y + height - 1; i += 1) {
-    draw_glyph_at(x, i);
-    draw_glyph_at(x + width - 1, i);
+    draw_glyph_at(console, x, i);
+    draw_glyph_at(console, x + width - 1, i);
   }
 
   console->graphic_context.index  = previous_index;
 }
 
 DRB_FFI
-void draw_thick_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
+void draw_thick_window(Console* console,Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
   Uint8 previous_index  = console->graphic_context.index;
 
   console->graphic_context.index = THICK_WINDOW_BOTTOM_LEFT_INDEX;
-  draw_glyph_at(x, y);
+  draw_glyph_at(console, x, y);
 
   console->graphic_context.index = THICK_WINDOW_BOTTOM_RIGHT_INDEX;
-  draw_glyph_at(x + width - 1, y);
+  draw_glyph_at(console, x + width - 1, y);
 
   console->graphic_context.index = THICK_WINDOW_TOP_LEFT_INDEX;
-  draw_glyph_at(x, y + height - 1);
+  draw_glyph_at(console, x, y + height - 1);
 
   console->graphic_context.index = THICK_WINDOW_TOP_RIGHT_INDEX;
-  draw_glyph_at(x + width - 1, y + height - 1);
+  draw_glyph_at(console, x + width - 1, y + height - 1);
 
   console->graphic_context.index = THICK_WINDOW_TOP_BOTTOM_INDEX;
   for(size_t i = x + 1; i < x + width - 1; i += 1) {
-    draw_glyph_at(i, y);
-    draw_glyph_at(i, y + height - 1);
+    draw_glyph_at(console, i, y);
+    draw_glyph_at(console, i, y + height - 1);
   }
 
   console->graphic_context.index = THICK_WINDOW_LEFT_RIGHT_INDEX;
   for(size_t i = y + 1; i < y + height - 1; i += 1) {
-    draw_glyph_at(x, i);
-    draw_glyph_at(x + width - 1, i);
+    draw_glyph_at(console, x, i);
+    draw_glyph_at(console, x + width - 1, i);
   }
 
   console->graphic_context.index  = previous_index;
@@ -646,16 +662,16 @@ void draw_thick_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height) {
 
 // --- Polygons :
 DRB_FFI
-Uint32* get_polygon_vertices_array(void) {
+Uint32* get_polygon_vertices_array(Console* console) {
   return console->vertices;
 }
 
 DRB_FFI
-void set_polygon_vertex_count(size_t count) {
+void set_polygon_vertex_count(Console* console,size_t count) {
   console->vertex_count = count;
 }
 
-void scan_polygon_left_edge(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
+void scan_polygon_left_edge(Console* console,Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
   int x, y, dx, dy, x_increment, y_increment, d;
 
   // Set-up of the bresenham algorythm :
@@ -729,7 +745,7 @@ void scan_polygon_left_edge(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
   }
 }
 
-void scan_polygon_right_edge(Uint32 x1, Uint32 y1, Uint32 x2, Uint32 y2) {
+void scan_polygon_right_edge(Console* console,Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2) {
   int x, y, dx, dy, x_increment, y_increment, d;
 
   // Set-up of the bresenham algorythm :
@@ -805,7 +821,7 @@ void scan_polygon_right_edge(Uint32 x1, Uint32 y1, Uint32 x2, Uint32 y2) {
 
 
 DRB_FFI
-void fill_polygon(void) {
+void fill_polygon(Console* console) {
   size_t  i;
 
   // Clearing the rasterizer's buffers :
@@ -854,7 +870,8 @@ void fill_polygon(void) {
   // Left :
   i = 0;
   while ( console->vertices[2 * ( ( ( max_y_index + i * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1] != min_y ) {
-    scan_polygon_left_edge( console->vertices[2 * ( ( ( max_y_index + i * winding_order ) + console->vertex_count ) % console->vertex_count ) ],
+    scan_polygon_left_edge( console,
+                            console->vertices[2 * ( ( ( max_y_index + i * winding_order ) + console->vertex_count ) % console->vertex_count ) ],
                             console->vertices[2 * ( ( ( max_y_index + i * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1],
                             console->vertices[2 * ( ( ( max_y_index + ( i + 1 ) * winding_order ) + console->vertex_count ) % console->vertex_count ) ],
                             console->vertices[2 * ( ( ( max_y_index + ( i + 1 ) * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1] );
@@ -865,7 +882,8 @@ void fill_polygon(void) {
   // Right :
   i = 0;
   while ( console->vertices[2 * ( ( ( max_y_index - i * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1] != min_y ) {
-    scan_polygon_right_edge(  console->vertices[2 * ( ( ( max_y_index - i * winding_order ) + console->vertex_count ) % console->vertex_count )],
+    scan_polygon_right_edge(  console,
+                              console->vertices[2 * ( ( ( max_y_index - i * winding_order ) + console->vertex_count ) % console->vertex_count )],
                               console->vertices[2 * ( ( ( max_y_index - i * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1],
                               console->vertices[2 * ( ( ( max_y_index - ( i + 1 ) * winding_order ) + console->vertex_count ) % console->vertex_count ) ],
                               console->vertices[2 * ( ( ( max_y_index - ( i + 1 ) * winding_order ) + console->vertex_count ) % console->vertex_count ) + 1] );
@@ -876,13 +894,13 @@ void fill_polygon(void) {
 
   // Draw the polygon :
   for(i = min_y; i <= max_y; i += 1)
-    draw_horizontal_line(console->left_scan[i], console->right_scan[i], i);
+    draw_horizontal_line(console, console->left_scan[i], console->right_scan[i], i);
 }
 
 
 // --- Sprites :
 DRB_FFI
-Sprite create_sprite(Uint32 width,Uint32 height) {
+Sprite create_sprite(Console* console,Uint32 width,Uint32 height) {
   Sprite* new_sprite      = (Sprite*)calloc(1, sizeof(Sprite));
 
   new_sprite->width       = width;
@@ -891,18 +909,18 @@ Sprite create_sprite(Uint32 width,Uint32 height) {
   new_sprite->foregrounds = (Uint32*)calloc(width * height, sizeof(Uint32));
   new_sprite->backgrounds = (Uint32*)calloc(width * height, sizeof(Uint32));
 
-  sprites[sprite_count]   = *new_sprite;
-  sprite_count           += 1;
+  console->sprites[console->sprite_count] = *new_sprite;
+  console->sprite_count                  += 1;
 
   return *new_sprite;
 }
 
 DRB_FFI
-size_t get_sprite_count(void) {
-  return sprite_count;
+size_t get_sprite_count(Console* console) {
+  return console->sprite_count;
 }
 
-void free_sprite(Sprite* sprite) {
+void free_sprite(Console* console,Sprite* sprite) {
   free(sprite->indices);
   free(sprite->foregrounds);
   free(sprite->backgrounds);
@@ -910,8 +928,8 @@ void free_sprite(Sprite* sprite) {
 }
 
 DRB_FFI
-void draw_sprite_at(size_t sprite_index,Uint32 x,Uint32 y) {
-  Sprite sprite = sprites[sprite_index];
+void draw_sprite_at(Console* console,size_t sprite_index,Uint32 x,Uint32 y) {
+  Sprite sprite = console->sprites[sprite_index];
 
   for(size_t i = 0; i < sprite.height; i += 1) {
     for(size_t j = 0; j < sprite.width; j += 1) {
@@ -922,7 +940,7 @@ void draw_sprite_at(size_t sprite_index,Uint32 x,Uint32 y) {
         console->graphic_context.foreground  = sprite.foregrounds[glyph_index];
         console->graphic_context.background  = sprite.backgrounds[glyph_index];
 
-        draw_glyph_at(x+j,y+i);
+        draw_glyph_at(console, x+j, y+i);
       }
     }
   }

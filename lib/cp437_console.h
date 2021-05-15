@@ -1,7 +1,4 @@
-#include <stdint.h>
-#include "cp437_8x8.h"
-#include "cp437_8x14.h"
-#include "cp437_8x16.h"
+#include "font.h"
 
 
 
@@ -29,7 +26,7 @@
 #define THICK_WINDOW_TOP_BOTTOM_INDEX       205
 #define THICK_WINDOW_LEFT_RIGHT_INDEX       186
 
-#define MAX_VERTICES                        128
+#define MAX_VERTICES                        64
 
 #define MAX_SPRITES                         128
 
@@ -75,7 +72,19 @@ typedef struct GraphicContext {
   Uint8   window_left_right_index;
 } GraphicContext;
 
+typedef struct Sprite {
+  Uint32  width;
+  Uint32  height;
+  Uint8*  indices;
+  Uint32* foregrounds;
+  Uint32* backgrounds;
+} Sprite;
+
 typedef struct Console {
+  // Fonts :
+  Uint8                     fonts_count;
+  Font**                    fonts;
+
   // Geometry :
   Uint32                    width;          // in glyphs
   Uint32                    height;         // in glyphs
@@ -95,19 +104,15 @@ typedef struct Console {
   // Rendering :
   Uint32*                   left_scan;
   Uint32*                   right_scan;
-  Uint32                    vertices[MAX_VERTICES];
+  Uint32                    *vertices;
   size_t                    vertex_count;
+
+  // Sprites :
+  Sprite                    *sprites;
+  size_t                    sprite_count;
 
   drb_upload_pixel_array_fn drb_upload_pixel_array;
 } Console;
-
-typedef struct Sprite {
-  Uint32  width;
-  Uint32  height;
-  Uint8*  indices;
-  Uint32* foregrounds;
-  Uint32* backgrounds;
-} Sprite;
 
 
 
@@ -118,88 +123,71 @@ typedef struct Sprite {
 /******************************************************************************/
 
 // --- Creator and Destructor :
-void init_console(Uint32 width,Uint32 height,char* font_name,Glyph init_glyph);
-void delete_console(void);
+Console*  init_console(Uint32 width,Uint32 height,char* font_name,Glyph init_glyph);
+void      free_console(Console* console);
 
 // --- Update :
-void update_console(void);
+void update_console(Console* console);
 
 // --- Geometry Management :
-int   get_console_width(void);
-int   get_console_height(void);
-int   get_console_pixel_width(void);
-int   get_console_pixel_height(void);
-void  resize_console(Uint32 width,Uint32 height);
+int   get_console_width(Console* console);
+int   get_console_height(Console* console);
+int   get_console_pixel_width(Console* console);
+int   get_console_pixel_height(Console* console);
+void  resize_console(Console* console,Uint32 width,Uint32 height);
 
 // --- Font Management :
-Font* get_font_by_name(char* font_name);
-Font  get_current_font(void);
-void  set_gc_font(char* const font_name);
+Font* get_font_by_name(Console* console,char* font_name);
+Font  get_current_font(Console* console);
+void  set_gc_font(Console* console,char* const font_name);
 
 // --- Graphic Context :
-void set_gc_index(Uint8 index);
-void set_gc_foreground(Uint32 foreground);
-void set_gc_background(Uint32 background);
-void set_gc_clear_index(Uint8 index);
-void set_gc_clear_foreground(Uint32 foreground);
-void set_gc_clear_background(Uint32 background);
-void window_top_left_index(Uint8 index);
-void window_top_right_index(Uint8 index);
-void window_bottom_left_index(Uint8 index);
-void window_bottom_right_index(Uint8 index);
-void window_top_bottom_index(Uint8 index);
-void window_left_right_index(Uint8 index);
+void set_gc_index(Console* console,Uint8 index);
+void set_gc_foreground(Console* console,Uint32 foreground);
+void set_gc_background(Console* console,Uint32 background);
+void set_gc_clear_index(Console* console,Uint8 index);
+void set_gc_clear_foreground(Console* console,Uint32 foreground);
+void set_gc_clear_background(Console* console,Uint32 background);
+void window_top_left_index(Console* console,Uint8 index);
+void window_top_right_index(Console* console,Uint8 index);
+void window_bottom_left_index(Console* console,Uint8 index);
+void window_bottom_right_index(Console* console,Uint8 index);
+void window_top_bottom_index(Console* console,Uint8 index);
+void window_left_right_index(Console* console,Uint8 index);
 
 // --- DRAWING :
 // --- Clearing the console :
-void clear_console(void);
+void clear_console(Console* console);
 
 // --- Single Glyphs :
-Glyph get_glyph_at(Uint32 x,Uint32 y);
-void  draw_glyph_at(Uint32 x,Uint32 y);
+Glyph get_glyph_at(Console* console,Uint32 x,Uint32 y);
+void  draw_glyph_at(Console* console,Uint32 x,Uint32 y);
 
 // --- Strings :
-void draw_string_at(char* const string,Uint32 x,Uint32 y);
+void draw_string_at(Console* console,char* const string,Uint32 x,Uint32 y);
 
 // --- Lines :
-void draw_horizontal_line(Uint32 x1,Uint32 x2,Uint32 y);
-void draw_vertical_line(Uint32 x,Uint32 y1,Uint32 y2);
-void draw_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2);
-void draw_antialiased_line(Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2);
+void draw_horizontal_line(Console* console,Uint32 x1,Uint32 x2,Uint32 y);
+void draw_vertical_line(Console* console,Uint32 x,Uint32 y1,Uint32 y2);
+void draw_line(Console* console,Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2);
+void draw_antialiased_line(Console* console,Uint32 x1,Uint32 y1,Uint32 x2,Uint32 y2);
 
 // --- Rectangles :
-void stroke_rectangle(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
-void fill_rectangle(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
+void stroke_rectangle(Console* console,Uint32 x,Uint32 y,Uint32 width,Uint32 height);
+void fill_rectangle(Console* console,Uint32 x,Uint32 y,Uint32 width,Uint32 height);
 
 // --- Windows :
-void draw_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
-void draw_thin_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
-void draw_thick_window(Uint32 x,Uint32 y,Uint32 width,Uint32 height);
+void draw_window(Console* console,Uint32 x,Uint32 y,Uint32 width,Uint32 height);
+void draw_thin_window(Console* console,Uint32 x,Uint32 y,Uint32 width,Uint32 height);
+void draw_thick_window(Console* console,Uint32 x,Uint32 y,Uint32 width,Uint32 height);
 
 // --- Convex Polygons :
-Uint32* get_polygon_vertices_array(void);
-void    set_polygon_vertex_count(size_t count);
-void    fill_polygon(void);
+Uint32* get_polygon_vertices_array(Console* console);
+void    set_polygon_vertex_count(Console* console,size_t count);
+void    fill_polygon(Console* console);
 
 // --- Sprites :
-Sprite  create_sprite(Uint32 width,Uint32 height);
-void    free_sprite(Sprite* sprite);
-size_t  get_sprite_count(void);
-void    draw_sprite_at(size_t sprite_index,Uint32 x,Uint32 y);
-
-
-
-
-
-/******************************************************************************/
-/* GLOBAL VARIABLES :                                                         */
-/******************************************************************************/
-Uint8     fonts_count = 3;
-Font*     fonts[]     = { &cp437_8x8,
-                          &cp437_8x14,
-                          &cp437_8x16 };
-
-Console*  console;
-
-Sprite    sprites[MAX_SPRITES];
-size_t    sprite_count  = 0;
+Sprite  create_sprite(Console* console,Uint32 width,Uint32 height);
+void    free_sprite(Console* console,Sprite* sprite);
+size_t  get_sprite_count(Console* console);
+void    draw_sprite_at(Console* console,size_t sprite_index,Uint32 x,Uint32 y);
