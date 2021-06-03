@@ -7,6 +7,7 @@
 /******************************************************************************/
 /* CONSTANTS :                                                                */
 /******************************************************************************/
+#define JAPANESE_FONT_CP437_OFFSET          1000
 #define LINE_BOTTOM_LEFT_TO_TOP_RIGHT_GLYPH 47
 #define LINE_TOP_LEFT_TO_BOTTOM_RIGHT_GLYPH 92
 #define LINE_HORIZONTAL_GLYPH               45
@@ -46,17 +47,18 @@ typedef void (*drb_upload_pixel_array_fn)(const char *name,const int w,const int
 typedef struct Glyph {
   Uint32  foreground;
   Uint32  background;
-  Uint8   index;
+  //Uint8   index;
+  Uint32  index;
 } Glyph;
 
 typedef struct GraphicContext {
   Font*   font;
 
-  Uint8   index;
+  Uint32  index;
   Uint32  foreground;
   Uint32  background;
 
-  Uint8   clear_index;
+  Uint32  clear_index;
   Uint32  clear_foreground;
   Uint32  clear_background;
 
@@ -64,18 +66,18 @@ typedef struct GraphicContext {
   bool    should_draw_foreground;
   bool    should_draw_background;
 
-  Uint8   window_top_left_index;
-  Uint8   window_top_right_index;
-  Uint8   window_bottom_left_index;
-  Uint8   window_bottom_right_index;
-  Uint8   window_top_bottom_index;
-  Uint8   window_left_right_index;
+  Uint32  window_top_left_index;
+  Uint32  window_top_right_index;
+  Uint32  window_bottom_left_index;
+  Uint32  window_bottom_right_index;
+  Uint32  window_top_bottom_index;
+  Uint32  window_left_right_index;
 } GraphicContext;
 
 typedef struct Sprite {
   Uint32  width;
   Uint32  height;
-  Uint8*  indices;
+  Uint32* indices;
   Uint32* foregrounds;
   Uint32* backgrounds;
 } Sprite;
@@ -142,18 +144,18 @@ Font  get_current_font(Console* console);
 void  set_gc_font(Console* console,char* const font_name);
 
 // --- Graphic Context :
-void set_gc_index(Console* console,Uint8 index);
+void set_gc_index(Console* console,Uint32 index);
 void set_gc_foreground(Console* console,Uint32 foreground);
 void set_gc_background(Console* console,Uint32 background);
-void set_gc_clear_index(Console* console,Uint8 index);
+void set_gc_clear_index(Console* console,Uint32 index);
 void set_gc_clear_foreground(Console* console,Uint32 foreground);
 void set_gc_clear_background(Console* console,Uint32 background);
-void window_top_left_index(Console* console,Uint8 index);
-void window_top_right_index(Console* console,Uint8 index);
-void window_bottom_left_index(Console* console,Uint8 index);
-void window_bottom_right_index(Console* console,Uint8 index);
-void window_top_bottom_index(Console* console,Uint8 index);
-void window_left_right_index(Console* console,Uint8 index);
+void window_top_left_index(Console* console,Uint32 index);
+void window_top_right_index(Console* console,Uint32 index);
+void window_bottom_left_index(Console* console,Uint32 index);
+void window_bottom_right_index(Console* console,Uint32 index);
+void window_top_bottom_index(Console* console,Uint32 index);
+void window_left_right_index(Console* console,Uint32 index);
 
 // --- DRAWING :
 // --- Clearing the console :
@@ -165,6 +167,7 @@ void  draw_glyph_at(Console* console,Uint32 x,Uint32 y);
 
 // --- Strings :
 void draw_string_at(Console* console,char* const string,Uint32 x,Uint32 y);
+void draw_cp437_string_with_japanese_font_at(Console* console,char* const string,Uint32 x,Uint32 y);
 
 // --- Lines :
 void draw_horizontal_line(Console* console,Uint32 x1,Uint32 x2,Uint32 y);

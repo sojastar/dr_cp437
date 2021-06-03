@@ -1,4 +1,5 @@
 require 'lib/cp437_console.rb'
+#require 'lib/utf8_to_jp_font.rb'
 
 RAND_SIZE       = 10000
 RAND            = RAND_SIZE.times.map { |i| rand }
@@ -85,7 +86,8 @@ def setup(args)
                                         [   0, b, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [   0, b, b ] ] )
 
   # --- Demos setup :
-  args.state.current_demo     = :single_glyphs_and_strings
+  #args.state.current_demo     = :single_glyphs_and_strings
+  args.state.current_demo     = :japanese
 
   args.state.antialiased      = false
 
@@ -104,6 +106,23 @@ def setup(args)
   args.state.sprite_cube_data = $gtk.read_file('app/sprite_cube_data.json').split("\n").map { |line| $gtk.parse_json(line) }
 
   args.state.setup_done       = true
+end
+
+
+def setup_japanese(args)
+  args.state.console    = CP437::Console.new  0, 0,                 # the x and y position of the console
+                                              80, 45,               # the width and height of the console (in glyphs)
+                                              2,                    # the console's scaling factor
+                                              CP437::FONT_LIST[3],  # the font
+                                              2,                    # the startup fill glyph index
+                                              [64, 64, 64, 255],    # the startup fill glyph color
+                                              [ 0,  0,  0, 255]     # the startup fill background color
+  args.state.console.init_japanese
+
+  args.state.console.current_foreground = [255, 255, 255, 255]
+  args.state.console.current_background = [ 0, 0, 0, 255]
+
+  args.state.japanese_setup_done = true
 end
 
 
@@ -306,6 +325,14 @@ def tick(args)
     end
 
     args.state.cube_frames  = ( args.state.cube_frames + 1 ) % 2160
+
+    args.state.current_demo = :japanese  if args.inputs.keyboard.key_down.space
+
+  when :japanese
+    setup_japanese(args) unless args.state.japanese_setup_done
+
+    args.state.console.draw_japanese_string_at "ドラルビが大好きです！", 40, 25
+    args.state.console.draw_string_at "abcd", 40, 26
   end
 
 

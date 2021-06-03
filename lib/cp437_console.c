@@ -7,6 +7,7 @@
 #include "cp437_8x8.h"
 #include "cp437_8x14.h"
 #include "cp437_8x16.h"
+#include "cp437_8x8j.h"
 
 
 
@@ -23,11 +24,12 @@ Console* init_console(Uint32 width,Uint32 height,char* font_name,Glyph init_glyp
   Console* console  = (Console *)malloc(sizeof(Console));
 
   // --- Fonts :
-  console->fonts_count  = 3;
+  console->fonts_count  = 4;
   console->fonts        = (Font**)malloc(console->fonts_count * sizeof(Font*));
   console->fonts[0]     = &cp437_8x8;
   console->fonts[1]     = &cp437_8x14;
   console->fonts[2]     = &cp437_8x16;
+  console->fonts[3]     = &cp437_8x8j;
 
   // --- Setting the console's dimensions :
   console->width  = width;
@@ -186,7 +188,7 @@ void set_gc_font(Console* console,char* const font_name) {
 
 /* ---=== GRAPHIC CONTEXT : ===--- */
 DRB_FFI
-void set_gc_index(Console* console,Uint8 index) {
+void set_gc_index(Console* console,Uint32 index) {
   console->graphic_context.index = index;
 }
 
@@ -211,37 +213,37 @@ void set_gc_clear_foreground(Console* console,Uint32 foreground) {
 }
 
 DRB_FFI
-void set_gc_clear_index(Console* console,Uint8 index) {
-  console->graphic_context.clear_index = index;
+void set_gc_clear_index(Console* console,Uint32 index) {
+  console->graphic_context.clear_index                = index;
 }
 
 DRB_FFI
-void set_gc_window_top_left_index(Console* console,Uint8 index) {
+void set_gc_window_top_left_index(Console* console,Uint32 index) {
   console->graphic_context.window_top_left_index      = index;
 }
 
 DRB_FFI
-void set_gc_window_top_right_index(Console* console,Uint8 index) {
+void set_gc_window_top_right_index(Console* console,Uint32 index) {
   console->graphic_context.window_top_right_index     = index;
 }
 
 DRB_FFI
-void set_gc_window_bottom_left_index(Console* console,Uint8 index) {
+void set_gc_window_bottom_left_index(Console* console,Uint32 index) {
   console->graphic_context.window_bottom_left_index   = index;
 }
 DRB_FFI
 
-void set_gc_window_bottom_right_index(Console* console,Uint8 index) {
+void set_gc_window_bottom_right_index(Console* console,Uint32 index) {
   console->graphic_context.window_bottom_right_index  = index;
 }
 DRB_FFI
 
-void set_gc_window_top_bottom_index(Console* console,Uint8 index) {
+void set_gc_window_top_bottom_index(Console* console,Uint32 index) {
   console->graphic_context.window_top_bottom_index    = index;
 }
 
 DRB_FFI
-void set_gc_window_left_right_index(Console* console,Uint8 index) {
+void set_gc_window_left_right_index(Console* console,Uint32 index) {
   console->graphic_context.window_left_right_index    = index;
 }
 
@@ -251,7 +253,7 @@ void set_gc_window_left_right_index(Console* console,Uint8 index) {
 DRB_FFI
 void clear_console(Console* console) {
   // Saving the current drawing glyph... :
-  Uint8   previous_index              = console->graphic_context.index;
+  Uint32  previous_index              = console->graphic_context.index;
   Uint32  previous_foreground         = console->graphic_context.foreground;
   Uint32  previous_background         = console->graphic_context.background;
 
@@ -300,7 +302,7 @@ void draw_glyph_at(Console* console,Uint32 x,Uint32 y) {
   if (console->graphic_context.should_draw_background)
     console->glyphs[glyph_offset].background  = console->graphic_context.background;
 
-  Uint8 index = console->glyphs[glyph_offset].index;
+  Uint32 index = console->glyphs[glyph_offset].index;
 
   // --- Drawing the pixels :
   Uint32 x_offset = x * console->graphic_context.font->width;
@@ -321,6 +323,14 @@ DRB_FFI
 void draw_string_at(Console* console,char* const string,Uint32 x,Uint32 y) {
   for(size_t i = 0; i < string[i]; i += 1) {
     set_gc_index(console, (Uint8)string[i]);
+    draw_glyph_at(console, x + i, y);
+  }
+}
+
+DRB_FFI
+void draw_cp437_string_with_japanese_font_at(Console* console,char* const string,Uint32 x,Uint32 y) {
+  for(size_t i = 0; i < string[i]; i += 1) {
+    set_gc_index(console, JAPANESE_FONT_CP437_OFFSET + (Uint8)string[i]);
     draw_glyph_at(console, x + i, y);
   }
 }
@@ -905,7 +915,7 @@ Sprite create_sprite(Console* console,Uint32 width,Uint32 height) {
 
   new_sprite->width       = width;
   new_sprite->height      = height;
-  new_sprite->indices     = (Uint8*)calloc(width * height, sizeof(Uint8));
+  new_sprite->indices     = (Uint32*)calloc(width * height, sizeof(Uint32));
   new_sprite->foregrounds = (Uint32*)calloc(width * height, sizeof(Uint32));
   new_sprite->backgrounds = (Uint32*)calloc(width * height, sizeof(Uint32));
 
