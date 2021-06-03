@@ -196,53 +196,6 @@ module CP437
       FFI::CP437Console.draw_string_at(@c_console, string, x, y)
     end
 
-    def japanese_font_index(char)
-      @utf8_to_jp_font[char.bytes]
-    end
-
-    def draw_japanese_string_at(string,x,y)
-      byte_index  = 0
-      char_index  = 0
-      while byte_index < string.length do
-        #puts "byte_index = #{byte_index} - char_index = #{char_index} - byte = #{string.bytes[byte_index].to_s(16)}"
-        case string.bytes[byte_index]
-        when 0..0x5C        # 1 byte long char
-          char_bytes  = string.bytes[byte_index,1]
-          FFI::CP437Console.set_gc_index(@c_console,  @utf8_to_jp_font[char_bytes])
-          FFI::CP437Console.draw_glyph_at(@c_console, x + char_index, y)
-
-          byte_index += 1
-          char_index += 1
-
-        when 0xC2..0xD1     # 2 bytes long char
-          char_bytes  = string.bytes[byte_index,2]
-          FFI::CP437Console.set_gc_index(@c_console,  @utf8_to_jp_font[char_bytes])
-          FFI::CP437Console.draw_glyph_at(@c_console, x + char_index, y)
-
-          byte_index += 2
-          char_index += 1
-
-        when 0xE3..0xEF     # 3 bytes long char
-          char_bytes  = string.bytes[byte_index,3]
-          FFI::CP437Console.set_gc_index(@c_console,  @utf8_to_jp_font[char_bytes])
-          FFI::CP437Console.draw_glyph_at(@c_console, x + char_index, y)
-
-          byte_index += 3
-          char_index += 1
-
-        else
-          puts "Error: character first byte 0x#{string.bytes[byte_index].to_s(16)} at index #{byte_index} not in acceptable range. Trying to skip..."
-
-          byte_index += 1 # dangerous, but what else can we do ?
-
-        end
-      end
-    end
-
-    def draw_cp437_string_with_japanese_font_at(string,x,y)
-      FFI::CP437Console.draw_cp437_string_with_japanese_font_at(@c_console, string, x, y)
-    end
-
     # --- Lines :
     def draw_horizontal_line(x1,x2,y)
       FFI::CP437Console.draw_horizontal_line(@c_console, x1, x2, y)
@@ -282,6 +235,7 @@ module CP437
       FFI::CP437Console.draw_thick_window(@c_console, x, y, width, height)
     end
 
+    # --- Polygons :
     def stroke_polygon(vertices)
       vertices.each_cons(2) { |pair| FFI::CP437Console.draw_line(@c_console, *(pair.flatten)) }
       FFI::CP437Console.draw_line(@c_console, *(vertices.last + vertices.first).flatten)
@@ -301,6 +255,7 @@ module CP437
       FFI::CP437Console.fill_polygon(@c_console)
     end
 
+    # --- Sprites :
     def draw_sprite_at(tag,x,y)
       FFI::CP437Console::draw_sprite_at(@c_console, @sprite_list[tag][:index], x, y)
     end
@@ -316,6 +271,53 @@ module CP437
 
       @sprite_list[tag] = { index:  FFI::CP437Console::get_sprite_count(@c_console) - 1,
                             sprite: new_sprite }
+    end
+
+    # --- Japanese :
+    def japanese_font_index(char)
+      @utf8_to_jp_font[char.bytes]
+    end
+
+    def draw_japanese_string_at(string,x,y)
+      byte_index  = 0
+      char_index  = 0
+      while byte_index < string.length do
+        case string.bytes[byte_index]
+        when 0..0x5C        # 1 byte long char
+          char_bytes  = string.bytes[byte_index,1]
+          FFI::CP437Console.set_gc_index(@c_console,  @utf8_to_jp_font[char_bytes])
+          FFI::CP437Console.draw_glyph_at(@c_console, x + char_index, y)
+
+          byte_index += 1
+          char_index += 1
+
+        when 0xC2..0xD1     # 2 bytes long char
+          char_bytes  = string.bytes[byte_index,2]
+          FFI::CP437Console.set_gc_index(@c_console,  @utf8_to_jp_font[char_bytes])
+          FFI::CP437Console.draw_glyph_at(@c_console, x + char_index, y)
+
+          byte_index += 2
+          char_index += 1
+
+        when 0xE3..0xEF     # 3 bytes long char
+          char_bytes  = string.bytes[byte_index,3]
+          FFI::CP437Console.set_gc_index(@c_console,  @utf8_to_jp_font[char_bytes])
+          FFI::CP437Console.draw_glyph_at(@c_console, x + char_index, y)
+
+          byte_index += 3
+          char_index += 1
+
+        else
+          puts "Error: character first byte 0x#{string.bytes[byte_index].to_s(16)} at index #{byte_index} not in acceptable range. Trying to skip..."
+
+          byte_index += 1 # dangerous, but what else can we do ?
+
+        end
+      end
+    end
+
+    def draw_cp437_string_with_japanese_font_at(string,x,y)
+      FFI::CP437Console.draw_cp437_string_with_japanese_font_at(@c_console, string, x, y)
     end
   end
 end

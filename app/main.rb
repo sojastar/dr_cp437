@@ -331,8 +331,8 @@ def tick(args)
   when :japanese
     setup_japanese(args) unless args.state.japanese_setup_done
 
-    args.state.console.draw_japanese_string_at "ドラルビが大好きです！", 40, 25
-    args.state.console.draw_string_at "abcd", 40, 26
+    args.state.console.draw_japanese_string_at("ドラルビが大好きです！", 40, 25)
+    args.state.console.draw_cp437_string_with_japanese_font_at("I love DragonRuby!", 40, 24)
   end
 
 

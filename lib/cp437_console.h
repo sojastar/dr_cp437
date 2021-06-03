@@ -7,7 +7,7 @@
 /******************************************************************************/
 /* CONSTANTS :                                                                */
 /******************************************************************************/
-#define JAPANESE_FONT_CP437_OFFSET          1000
+#define JAPANESE_FONT_CP437_OFFSET          752
 #define LINE_BOTTOM_LEFT_TO_TOP_RIGHT_GLYPH 47
 #define LINE_TOP_LEFT_TO_BOTTOM_RIGHT_GLYPH 92
 #define LINE_HORIZONTAL_GLYPH               45
@@ -47,7 +47,6 @@ typedef void (*drb_upload_pixel_array_fn)(const char *name,const int w,const int
 typedef struct Glyph {
   Uint32  foreground;
   Uint32  background;
-  //Uint8   index;
   Uint32  index;
 } Glyph;
 
@@ -167,7 +166,6 @@ void  draw_glyph_at(Console* console,Uint32 x,Uint32 y);
 
 // --- Strings :
 void draw_string_at(Console* console,char* const string,Uint32 x,Uint32 y);
-void draw_cp437_string_with_japanese_font_at(Console* console,char* const string,Uint32 x,Uint32 y);
 
 // --- Lines :
 void draw_horizontal_line(Console* console,Uint32 x1,Uint32 x2,Uint32 y);
@@ -194,3 +192,7 @@ Sprite  create_sprite(Console* console,Uint32 width,Uint32 height);
 void    free_sprite(Console* console,Sprite* sprite);
 size_t  get_sprite_count(Console* console);
 void    draw_sprite_at(Console* console,size_t sprite_index,Uint32 x,Uint32 y);
+
+// --- Japanese :
+Uint32  get_japanese_font_index_for_cp437_index(Console* console,Uint32 index);
+void    draw_cp437_string_with_japanese_font_at(Console* console,char* const string,Uint32 x,Uint32 y);

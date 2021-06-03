@@ -327,14 +327,6 @@ void draw_string_at(Console* console,char* const string,Uint32 x,Uint32 y) {
   }
 }
 
-DRB_FFI
-void draw_cp437_string_with_japanese_font_at(Console* console,char* const string,Uint32 x,Uint32 y) {
-  for(size_t i = 0; i < string[i]; i += 1) {
-    set_gc_index(console, JAPANESE_FONT_CP437_OFFSET + (Uint8)string[i]);
-    draw_glyph_at(console, x + i, y);
-  }
-}
-
 
 // --- Lines :
 DRB_FFI
@@ -953,5 +945,20 @@ void draw_sprite_at(Console* console,size_t sprite_index,Uint32 x,Uint32 y) {
         draw_glyph_at(console, x+j, y+i);
       }
     }
+  }
+}
+
+
+// --- Japanese :
+DRB_FFI
+Uint32 get_japanese_font_index_for_cp437_index(Console* console,Uint32 index) {
+  return JAPANESE_FONT_CP437_OFFSET + index;
+}
+
+DRB_FFI
+void draw_cp437_string_with_japanese_font_at(Console* console,char* const string,Uint32 x,Uint32 y) {
+  for(size_t i = 0; i < string[i]; i += 1) {
+    set_gc_index(console, JAPANESE_FONT_CP437_OFFSET + (Uint8)string[i]);
+    draw_glyph_at(console, x + i, y);
   }
 }

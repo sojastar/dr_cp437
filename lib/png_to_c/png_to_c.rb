@@ -25,7 +25,8 @@ char_width,   char_height   = options[:char_size].split('x').map { |d| d.to_i }
 output                      = options[:output]
 input                       = ARGV.last
 
-puts "Loading #{input} of size #{pixel_width}x#{pixel_height}(px), #{char_width}x#{char_height}(chars)."
+#puts "Loading #{input} of size #{pixel_width}x#{pixel_height}(px), #{char_width}x#{char_height}(chars)."
+puts "Loading #{input} of size #{char_width}x#{char_height} chars, with chars of size #{pixel_width}x#{pixel_height} pixels"
 
 
 
