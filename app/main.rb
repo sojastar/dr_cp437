@@ -86,12 +86,11 @@ def setup(args)
                                         [   0, b, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [ 176, r, b ], [ 176, w, b ], [   0, b, b ] ] )
 
   # --- Demos setup :
-  #args.state.current_demo     = :single_glyphs_and_strings
-  args.state.current_demo     = :japanese
+  args.state.current_demo     = :single_glyphs_and_strings
 
   args.state.antialiased      = false
 
-  args.state.new_glyph_index  = randv * 255
+  args.state.new_glyph_index  = ( randv * 255 ).to_i
   args.state.new_foreground   = [ 150 + randv * 105, 150 + randv * 105, 150 + randv * 105, 255 ]
   args.state.new_background   = [       randv * 100,       randv * 100,       randv * 100, 255 ]
   args.state.new_x            = ( 8 + randv * 72 ).to_i
@@ -111,8 +110,8 @@ end
 
 def setup_japanese(args)
   args.state.console    = CP437::Console.new  0, 0,                 # the x and y position of the console
-                                              80, 45,               # the width and height of the console (in glyphs)
-                                              2,                    # the console's scaling factor
+                                              160, 90,              # the width and height of the console (in glyphs)
+                                              1,                    # the console's scaling factor
                                               CP437::FONT_LIST[3],  # the font
                                               2,                    # the startup fill glyph index
                                               [64, 64, 64, 255],    # the startup fill glyph color
@@ -120,7 +119,7 @@ def setup_japanese(args)
   args.state.console.init_japanese
 
   args.state.console.current_foreground = [255, 255, 255, 255]
-  args.state.console.current_background = [ 0, 0, 0, 255]
+  args.state.console.current_background = [  0,   0,   0, 255]
 
   args.state.japanese_setup_done = true
 end
@@ -233,7 +232,7 @@ def tick(args)
     # ... outside of the console WILL result in unexpected behaviour or  ...
     # .. a crash !!!
     if args.state.tick_count % 20 == 0 then
-      args.state.new_glyph_index  = randv * 255
+      args.state.new_glyph_index  = ( randv * 255 ).to_i
       args.state.new_foreground   = [ 150 + randv * 105, 150 + randv * 105, 150 + randv * 105, 255 ]
       args.state.new_background   = [       randv * 100,       randv * 100,       randv * 100, 255 ]
 
@@ -331,8 +330,15 @@ def tick(args)
   when :japanese
     setup_japanese(args) unless args.state.japanese_setup_done
 
-    args.state.console.draw_japanese_string_at("ドラルビが大好きです！", 40, 25)
-    args.state.console.draw_cp437_string_with_japanese_font_at("I love DragonRuby!", 40, 24)
+    # Due to the Japanese bitmap font having a totally different mapping     ...
+    # ... than the other regular CP437 fonts and that mapping being none     ...
+    # ... linear, we have to use specific method to draw Japanese strings.
+    args.state.console.draw_japanese_string_at("ドラルビが大好きです！", 75, 45)
+
+    # The regular CP437 font is embedded in an the empty space of the        ...
+    # ... japanese font. So wee need yet another drawing method to draw      ...
+    # ... regular CP437 when using the Japanese font.
+    args.state.console.draw_cp437_string_with_japanese_font_at("I love DragonRuby!", 71, 44)
   end
 
 
